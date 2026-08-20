@@ -278,7 +278,15 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const result = await response.json();
+      const raw = await response.text();
+      let result: { error?: string; destination?: string } = {};
+      if (raw) {
+        try {
+          result = JSON.parse(raw) as { error?: string; destination?: string };
+        } catch {
+          throw new Error("We couldn't save your RSVP. Please try again.");
+        }
+      }
       if (!response.ok) throw new Error(result.error || "We couldn't save your RSVP.");
       setStatus("success");
       setMessage(result.destination === "local-json" ? "Saved locally for testing." : "Your RSVP has been received.");
