@@ -8,6 +8,7 @@ type PublicGuest = {
   id: string;
   name: string;
   scheduleType: ScheduleType;
+  plusOneAllowed: boolean;
 };
 
 type Phase = "checking" | "login" | "envelope" | "opening" | "site";
@@ -262,7 +263,7 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
   const [plusOne, setPlusOne] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const hasPlusOne = guest.scheduleType === "extended";
+  const hasPlusOne = guest.plusOneAllowed;
   const partySize = hasPlusOne && plusOne === "yes" ? "2" : "1";
 
   async function submit(event: FormEvent<HTMLFormElement>) {

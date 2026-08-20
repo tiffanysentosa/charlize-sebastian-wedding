@@ -8,6 +8,7 @@ out
 *.log
 .DS_Store
 data/rsvps.local.json
+data/guests.json
 public/audio/*.mp3
 public/audio/*.m4a
 public/audio/*.wav

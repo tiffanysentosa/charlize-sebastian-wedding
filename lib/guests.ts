@@ -1,4 +1,6 @@
 import "server-only";
+import fs from "node:fs";
+import path from "node:path";
 import type { ScheduleType } from "./wedding";
 
 export type Guest = {
@@ -6,34 +8,61 @@ export type Guest = {
   name: string;
   passcode: string;
   scheduleType: ScheduleType;
+  /** When omitted, defaults to false. Set true per guest to show the +1 RSVP question. */
+  plusOneAllowed?: boolean;
 };
 
 const demoGuests: Guest[] = [
   {
     id: "test-extended",
     name: "Extended Test Guest",
-    passcode: "bali-extended",
+    passcode: "sunset-tide",
     scheduleType: "extended",
+    plusOneAllowed: true,
   },
   {
     id: "test-standard",
     name: "Standard Test Guest",
-    passcode: "bali-standard",
+    passcode: "seashell",
     scheduleType: "standard",
+    plusOneAllowed: false,
   },
 ];
 
-function getGuests(): Guest[] {
-  if (!process.env.GUESTS_JSON) return demoGuests;
+function normalizeGuest(guest: Guest): Guest {
+  return {
+    ...guest,
+    plusOneAllowed: guest.plusOneAllowed ?? false,
+  };
+}
+
+function parseGuestList(raw: unknown): Guest[] {
+  if (!Array.isArray(raw)) throw new Error("Guest list must be an array");
+  return raw.map((entry) => normalizeGuest(entry as Guest));
+}
+
+function loadGuestsFromFile(): Guest[] | null {
+  try {
+    const file = path.join(process.cwd(), "data", "guests.json");
+    return parseGuestList(JSON.parse(fs.readFileSync(file, "utf8")));
+  } catch {
+    return null;
+  }
+}
+
+function loadGuestsFromEnv(): Guest[] | null {
+  if (!process.env.GUESTS_JSON) return null;
 
   try {
-    const parsed = JSON.parse(process.env.GUESTS_JSON) as Guest[];
-    if (!Array.isArray(parsed)) throw new Error("GUESTS_JSON must be an array");
-    return parsed;
+    return parseGuestList(JSON.parse(process.env.GUESTS_JSON));
   } catch (error) {
     console.error("Invalid GUESTS_JSON; falling back to demo guests", error);
-    return demoGuests;
+    return null;
   }
+}
+
+function getGuests(): Guest[] {
+  return loadGuestsFromFile() ?? loadGuestsFromEnv() ?? demoGuests;
 }
 
 export function findGuestByPasscode(passcode: string) {
@@ -50,5 +79,6 @@ export function publicGuest(guest: Guest) {
     id: guest.id,
     name: guest.name,
     scheduleType: guest.scheduleType,
+    plusOneAllowed: guest.plusOneAllowed ?? false,
   };
 }

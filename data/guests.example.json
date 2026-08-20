@@ -1,0 +1,23 @@
+[
+  {
+    "id": "guest-001",
+    "name": "Jane Smith",
+    "passcode": "paradise_in_bali",
+    "scheduleType": "extended",
+    "plusOneAllowed": true
+  },
+  {
+    "id": "guest-002",
+    "name": "Tiffany Sentosa",
+    "passcode": "coral_reefs_in_bali",
+    "scheduleType": "extended",
+    "plusOneAllowed": false
+  },
+  {
+    "id": "guest-003",
+    "name": "Sarah Lee",
+    "passcode": "sandbars_in_bali",
+    "scheduleType": "standard",
+    "plusOneAllowed": false
+  }
+]
