@@ -585,19 +585,11 @@ export default function WeddingExperience() {
     const audio = audioRef.current;
     if (!audio) return;
     audio.loop = false;
-    audio.volume = 0;
+    audio.volume = 0.7;
     try {
       await audio.play();
       setMusicPlaying(true);
       setMusicAvailable(true);
-      const target = 0.42;
-      const step = 0.035;
-      const timer = window.setInterval(() => {
-        if (!audioRef.current) return window.clearInterval(timer);
-        const next = Math.min(target, audioRef.current.volume + step);
-        audioRef.current.volume = next;
-        if (next >= target) window.clearInterval(timer);
-      }, 80);
     } catch {
       setMusicAvailable(false);
       setMusicPlaying(false);
