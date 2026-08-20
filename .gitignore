@@ -9,6 +9,7 @@ out
 .DS_Store
 data/rsvps.local.json
 data/guests.json
-public/audio/*.mp3
+# Keep source downloads out of git if filenames are messy; ship the clean file instead.
+public/audio/Saint-Saens*.mp3
 public/audio/*.m4a
 public/audio/*.wav

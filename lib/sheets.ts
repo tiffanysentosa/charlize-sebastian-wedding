@@ -42,22 +42,39 @@ const headers = [
 ];
 
 function normalizePrivateKey(raw: string) {
-  let key = raw.trim();
+  let key = raw.trim().replace(/^\uFEFF/, "");
   if (
     (key.startsWith('"') && key.endsWith('"')) ||
     (key.startsWith("'") && key.endsWith("'"))
   ) {
     key = key.slice(1, -1);
   }
-  return key.replace(/\\n/g, "\n");
+  key = key.replace(/\\n/g, "\n").replace(/\r\n/g, "\n").trim();
+
+  // Vercel paste sometimes collapses the PEM into one line.
+  if (key.includes("BEGIN") && !key.includes("\n")) {
+    const match = key.match(/-----BEGIN ([^-]+)-----(.+)-----END ([^-]+)-----/);
+    if (match) {
+      const [, beginLabel, body, endLabel] = match;
+      const lines = body.replace(/\s+/g, "").match(/.{1,64}/g) ?? [];
+      key = `-----BEGIN ${beginLabel}-----\n${lines.join("\n")}\n-----END ${endLabel}-----`;
+    }
+  }
+
+  return key;
+}
+
+function missingGoogleEnvVars() {
+  const required = [
+    "GOOGLE_SHEET_ID",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+    "GOOGLE_PRIVATE_KEY",
+  ] as const;
+  return required.filter((name) => !process.env[name]?.trim());
 }
 
 function googleConfigured() {
-  return Boolean(
-    process.env.GOOGLE_SHEET_ID?.trim() &&
-      process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim() &&
-      process.env.GOOGLE_PRIVATE_KEY?.trim(),
-  );
+  return missingGoogleEnvVars().length === 0;
 }
 
 function b64url(value: string | Buffer) {
@@ -68,6 +85,10 @@ function b64url(value: string | Buffer) {
 async function getGoogleAccessToken() {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!;
   const privateKey = normalizePrivateKey(process.env.GOOGLE_PRIVATE_KEY!);
+  if (!privateKey.includes("BEGIN PRIVATE KEY") && !privateKey.includes("BEGIN RSA PRIVATE KEY")) {
+    throw new Error("Google authentication failed: GOOGLE_PRIVATE_KEY does not look like a valid private key.");
+  }
+
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = b64url(
@@ -80,10 +101,16 @@ async function getGoogleAccessToken() {
     }),
   );
   const unsigned = `${header}.${claims}`;
-  const signer = crypto.createSign("RSA-SHA256");
-  signer.update(unsigned);
-  signer.end();
-  const signature = b64url(signer.sign(privateKey));
+  let signature: string;
+  try {
+    const signer = crypto.createSign("RSA-SHA256");
+    signer.update(unsigned);
+    signer.end();
+    signature = b64url(signer.sign(privateKey));
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "invalid key";
+    throw new Error(`Google authentication failed: could not sign with GOOGLE_PRIVATE_KEY (${detail})`);
+  }
   const assertion = `${unsigned}.${signature}`;
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -182,7 +209,10 @@ export async function saveRsvp(record: RsvpRecord) {
   }
 
   if (process.env.NODE_ENV === "production") {
-    throw new Error("Google Sheets environment variables are not configured.");
+    const missing = missingGoogleEnvVars();
+    throw new Error(
+      `Google Sheets environment variables are not configured. Missing: ${missing.join(", ") || "unknown"}.`,
+    );
   }
 
   await appendLocally(record);

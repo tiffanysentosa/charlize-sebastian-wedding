@@ -11,6 +11,8 @@ type PublicGuest = {
   plusOneAllowed: boolean;
 };
 
+const MUSIC_SRC = "/audio/le-cygne.mp3";
+
 type Phase = "checking" | "login" | "envelope" | "opening" | "site";
 
 type Countdown = { days: number; hours: number; minutes: number; seconds: number };
@@ -43,7 +45,15 @@ function getCountdown(): Countdown | null {
   };
 }
 
-function Login({ onLogin }: { onLogin: (guest: PublicGuest) => void }) {
+function Login({
+  onLogin,
+  onUnlockMusic,
+  onStopMusic,
+}: {
+  onLogin: (guest: PublicGuest) => void;
+  onUnlockMusic: () => void;
+  onStopMusic: () => void;
+}) {
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,16 +62,28 @@ function Login({ onLogin }: { onLogin: (guest: PublicGuest) => void }) {
     event.preventDefault();
     setError("");
     setLoading(true);
+    // Start music inside the click gesture (before await) so browsers allow playback.
+    onUnlockMusic();
     try {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode }),
       });
-      const data = await response.json();
+      const raw = await response.text();
+      let data: { error?: string; guest?: PublicGuest } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as { error?: string; guest?: PublicGuest };
+        } catch {
+          throw new Error("Unable to open invitation. Please try again.");
+        }
+      }
       if (!response.ok) throw new Error(data.error || "Unable to open invitation.");
-      onLogin(data.guest as PublicGuest);
+      if (!data.guest) throw new Error("Unable to open invitation.");
+      onLogin(data.guest);
     } catch (err) {
+      onStopMusic();
       setError(err instanceof Error ? err.message : "Unable to open invitation.");
     } finally {
       setLoading(false);
@@ -287,7 +309,15 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
           throw new Error("We couldn't save your RSVP. Please try again.");
         }
       }
-      if (!response.ok) throw new Error(result.error || "We couldn't save your RSVP.");
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            (raw
+              ? "We couldn't save your RSVP."
+              : `We couldn't save your RSVP (server returned ${response.status} with an empty response). Check Vercel logs for /api/rsvp.`),
+        );
+      }
+      if (!raw) throw new Error("We couldn't save your RSVP. Empty server response.");
       setStatus("success");
       setMessage(result.destination === "local-json" ? "Saved locally for testing." : "Your RSVP has been received.");
     } catch (error) {
@@ -554,10 +584,12 @@ export default function WeddingExperience() {
   async function startMusic() {
     const audio = audioRef.current;
     if (!audio) return;
+    audio.loop = false;
     audio.volume = 0;
     try {
       await audio.play();
       setMusicPlaying(true);
+      setMusicAvailable(true);
       const target = 0.42;
       const step = 0.035;
       const timer = window.setInterval(() => {
@@ -572,6 +604,30 @@ export default function WeddingExperience() {
     }
   }
 
+  function ensureAudio() {
+    if (audioRef.current) return audioRef.current;
+    const audio = new Audio(MUSIC_SRC);
+    audio.preload = "auto";
+    audio.loop = false;
+    audio.addEventListener("ended", () => setMusicPlaying(false));
+    audioRef.current = audio;
+    return audio;
+  }
+
+  /** Must run synchronously inside a click/tap handler (before any await). */
+  function unlockMusicFromGesture() {
+    ensureAudio();
+    void startMusic();
+  }
+
+  function stopMusic() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
+    setMusicPlaying(false);
+  }
+
   function onLogin(current: PublicGuest) {
     setGuest(current);
     setPhase("envelope");
@@ -581,14 +637,6 @@ export default function WeddingExperience() {
     if (!guest || phase === "opening") return;
     setPhase("opening");
 
-    // Create the audio element synchronously within the tap gesture, then play.
-    if (!audioRef.current) {
-      const audio = new Audio("/audio/carnival-of-the-animals.mp3");
-      audio.preload = "auto";
-      audioRef.current = audio;
-    }
-    void startMusic();
-
     window.setTimeout(() => {
       window.sessionStorage.setItem("cs-wedding-opened", "1");
       setPhase("site");
@@ -596,30 +644,22 @@ export default function WeddingExperience() {
   }
 
   async function toggleMusic() {
-    const audio = audioRef.current;
-    if (!audio) {
-      const created = new Audio("/audio/carnival-of-the-animals.mp3");
-      created.preload = "auto";
-      audioRef.current = created;
+    const audio = ensureAudio();
+    if (audio.paused) {
       await startMusic();
       return;
     }
-    if (audio.paused) {
-      try {
-        await audio.play();
-        setMusicPlaying(true);
-      } catch {
-        setMusicAvailable(false);
-      }
-    } else {
-      audio.pause();
-      setMusicPlaying(false);
-    }
+    audio.pause();
+    setMusicPlaying(false);
   }
 
   if (phase === "checking") return <div className="loadingScreen"><span>CS · SS</span></div>;
-  if (phase === "login") return <Login onLogin={onLogin} />;
-  if (!guest) return <Login onLogin={onLogin} />;
+  if (phase === "login") {
+    return <Login onLogin={onLogin} onUnlockMusic={unlockMusicFromGesture} onStopMusic={stopMusic} />;
+  }
+  if (!guest) {
+    return <Login onLogin={onLogin} onUnlockMusic={unlockMusicFromGesture} onStopMusic={stopMusic} />;
+  }
   if (phase === "envelope" || phase === "opening") return <Envelope guest={guest} opening={phase === "opening"} onOpen={openEnvelope} />;
 
   return (

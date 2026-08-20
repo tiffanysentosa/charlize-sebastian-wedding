@@ -48,13 +48,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("RSVP save failed", error);
     const detail = error instanceof Error ? error.message : "Unknown error";
-    const message = detail.includes("Google Sheets environment variables")
-      ? "RSVP storage is not configured on the server. Please contact the couple."
-      : detail.includes("Google authentication failed")
-        ? "We couldn't connect to Google Sheets. Please check the server credentials."
-        : detail.includes("Google Sheets API 403")
-          ? "The Google Sheet isn't shared with the service account email."
-          : "We couldn't save your RSVP. Please try again in a moment.";
+    // Surface actionable setup errors on the form while debugging Vercel env.
+    const message =
+      detail.includes("Google Sheets environment variables") ||
+      detail.includes("Google authentication failed") ||
+      detail.includes("Google Sheets API")
+        ? detail
+        : "We couldn't save your RSVP. Please try again in a moment.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

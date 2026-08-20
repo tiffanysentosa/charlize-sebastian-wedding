@@ -1,6 +1,7 @@
-Put a licensed or public-domain recording here as:
-  carnival-of-the-animals.mp3
+Royalty-free track in use:
 
-Suggested movement for the opening: Aquarium.
+  le-cygne.mp3
+  Saint-Saëns — The Carnival of the Animals, XIII. Le Cygne (The Swan)
 
-The website intentionally does not ship with a commercial recording. The music starts only after the guest taps the envelope, which is a browser-allowed user interaction.
+Music starts on the login Continue click (a user gesture browsers allow).
+Guests can mute/unmute from the site header.
