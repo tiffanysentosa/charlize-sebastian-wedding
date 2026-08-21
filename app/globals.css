@@ -130,7 +130,15 @@ a { color: inherit; }
   line-height: 1.05;
   letter-spacing: 0;
   color: #2f2b27;
+  max-width: 100%;
+  padding-inline: 0.15em;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.28em;
 }
+.loginNameLine { display: inline-block; }
 .loginPrompt {
   margin-bottom: 8px;
   font-size: clamp(12px, 1.7vw, 16px);
@@ -228,6 +236,9 @@ a { color: inherit; }
 .envelopeHeading {
   position: relative;
   z-index: 2;
+  width: min(100%, 720px);
+  padding-inline: 12px;
+  box-sizing: border-box;
   text-align: center;
   margin-bottom: 10px;
   color: #fff;
@@ -259,12 +270,15 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: .18em;
+  flex-wrap: wrap;
+  gap: .1em .16em;
   font-family: var(--font-script), "Monsieur La Doulaise", cursive;
-  font-size: clamp(58px, 13vw, 92px);
+  font-size: clamp(42px, 11vw, 92px);
   font-weight: 400;
-  line-height: .9;
+  line-height: .95;
   padding-top: .12em;
+  padding-inline: 0.08em;
+  box-sizing: border-box;
   color: #fff;
 }
 .envelopeHeading h1 i {
@@ -392,24 +406,34 @@ a { color: inherit; }
 .videoHero { position: relative; height: calc(100svh - 118px); min-height: 560px; color: white; overflow: hidden; background: #6f7874; }
 .videoHero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .heroShade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(27,30,29,.08), rgba(24,25,23,.04) 45%, rgba(22,22,20,.19)); }
-.heroContent { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px 12px 44px; text-align: center; }
+.heroContent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  justify-items: center;
+  padding: 16px 16px 44px;
+  text-align: center;
+}
 
 .saveDateDoily {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(94vw, calc(100svh - 210px), 820px);
-  height: min(94vw, calc(100svh - 210px), 820px);
+  justify-self: center;
+  margin-inline: auto;
+  width: min(90vw, calc(100svh - 210px), 820px);
+  height: min(90vw, calc(100svh - 210px), 820px);
   filter: drop-shadow(0 18px 40px rgba(18, 16, 14, .28));
 }
 .saveDateDoily img {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
   object-fit: contain;
+  object-position: center;
   mix-blend-mode: screen;
 }
 .scrollCue { position: absolute; z-index: 2; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; }
@@ -632,12 +656,17 @@ a { color: inherit; }
 }
 .stayCard .kicker { color: var(--dusty-blue); }
 .stayCard h2 {
-  margin: 0;
+  margin: 0 auto;
+  max-width: 100%;
   font-family: var(--font-script), "Monsieur La Doulaise", cursive;
   font-size: clamp(42px, 8vw, 70px);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.12;
   letter-spacing: 0;
+  padding-inline: 0.2em;
+  box-sizing: border-box;
+  /* Script flourishes (esp. R) sit optically left; nudge for true visual center */
+  transform: translateX(0.06em);
 }
 .stayDates {
   margin: 12px 0 0;
@@ -768,12 +797,16 @@ a { color: inherit; }
 
 @media (max-width: 800px) {
   .sectionPad { padding: 82px 22px; }
-  .siteHeader { padding: 14px 18px 12px; }
+  .siteHeader { padding: 14px 52px 12px 18px; }
+  .siteNames {
+    font-size: clamp(20px, 5.6vw, 28px);
+    padding-inline: 4px;
+  }
   .siteNav { gap: 14px; }
   .siteNav a { font-size: 9px; letter-spacing: .14em; }
   .saveDateDoily {
-    width: min(96vw, calc(100svh - 180px), 720px);
-    height: min(96vw, calc(100svh - 180px), 720px);
+    width: min(86vw, calc(100svh - 200px), 640px);
+    height: min(86vw, calc(100svh - 200px), 640px);
   }
   .welcomeSection { min-height: auto; grid-template-columns: 1fr; gap: 50px; }
   .welcomeCopy { max-width: 92%; }
@@ -795,16 +828,45 @@ a { color: inherit; }
   .photoBreak img { object-position: 54% center; }
   .choiceGrid.two { grid-template-columns: 1fr; }
   .fieldRow { grid-template-columns: 1fr; }
-  .loginCardInner { padding: 16% 14% 14%; }
-  .loginCard h1 { margin-bottom: 10px; }
+  .loginScreen { padding: 24px 14px; }
+  .loginCard { width: min(92vw, 560px); }
+  .loginCardInner { padding: 18% 15% 15%; }
+  .loginCard h1 {
+    margin-bottom: 10px;
+    font-size: clamp(24px, 7.2vw, 36px);
+    line-height: 1.02;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 0;
+    column-gap: 0;
+  }
+  .loginForm { width: min(100%, 210px); }
+  .envelopeScreen { padding: 24px 18px 20px; }
+  .envelopeButton { width: min(84vw, 400px); }
+  .staySection { padding: 72px 18px; }
+  .stayCard {
+    width: min(88vw, 480px);
+    padding: 48px 26px 42px;
+  }
+  .stayCard h2 {
+    font-size: clamp(34px, 10.5vw, 52px);
+  }
 }
 
 @media (max-width: 480px) {
-  .envelopeButton { width: min(94vw, 400px); }
-  .envelopeHeading { margin-bottom: 4px; }
-  .envelopeHeading h1 { font-size: 62px; }
-  .saveDateDoily { width: min(98vw, 72svh, 560px); }
-  .siteNav { gap: 10px; flex-wrap: wrap; }
+  .envelopeButton { width: min(88vw, 360px); }
+  .envelopeHeading { margin-bottom: 8px; padding-inline: 8px; }
+  .envelopeHeading h1 {
+    font-size: clamp(34px, 9.5vw, 44px);
+    gap: .06em .12em;
+  }
+  .envelopeDear { font-size: 17px; margin-bottom: 10px; }
+  .saveDateDoily {
+    width: min(84vw, 70svh, 420px);
+    height: min(84vw, 70svh, 420px);
+  }
+  .heroContent { padding: 12px 14px 40px; }
+  .siteNav { gap: 10px; flex-wrap: wrap; justify-content: center; }
   .heroLocation { font-size: 9px; }
   .heroDate { font-size: 16px; }
   .sectionTitleRow { margin-bottom: 48px; }
@@ -813,6 +875,7 @@ a { color: inherit; }
   .eventColumn { border-right: 0; padding-bottom: 36px; }
   .eventColumn:nth-child(odd) { border-right: 0; }
   .formIntro { margin-bottom: 42px; }
+  .stayCard h2 { transform: translateX(0.08em); }
 }
 
 @media (prefers-reduced-motion: reduce) {
