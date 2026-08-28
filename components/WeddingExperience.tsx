@@ -112,10 +112,7 @@ function Login({
         <div className="loginCardInner">
           <p className="loginEyebrow">a private invitation</p>
           <p className="loginFrom">from</p>
-          <h1>
-            <span className="loginNameLine">Charlize and</span>
-            <span className="loginNameLine">Sebastian</span>
-          </h1>
+          <h1>Charlize and Sebastian</h1>
           <p className="loginPrompt">please enter your invitation code below</p>
           <form onSubmit={submit} className="loginForm">
             <label htmlFor="passcode" className="visuallyHidden">Invitation code</label>

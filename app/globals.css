@@ -98,15 +98,16 @@ a { color: inherit; }
   mix-blend-mode: screen;
 }
 .loginCardInner {
-  position: relative;
+  position: absolute;
+  inset: 18% 17% 17%;
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding: 17% 18% 15%;
+  gap: 0;
   text-align: center;
+  overflow: hidden;
 }
 .loginEyebrow,
 .loginFrom,
@@ -117,36 +118,33 @@ a { color: inherit; }
   font-weight: 400;
   color: #4a453f;
 }
-.loginEyebrow { font-size: clamp(14px, 2.2vw, 20px); }
+.loginEyebrow { font-size: clamp(13px, 2vw, 20px); }
 .loginFrom {
-  margin-top: 6px;
-  font-size: clamp(13px, 1.8vw, 17px);
+  margin-top: 4px;
+  font-size: clamp(12px, 1.7vw, 17px);
 }
 .loginCard h1 {
-  margin: 2px 0 14px;
+  margin: 4px 0 10px;
+  width: 100%;
   font-family: var(--font-script), "Monsieur La Doulaise", cursive;
-  font-size: clamp(28px, 5.4vw, 52px);
+  font-size: clamp(26px, 5vw, 52px);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.1;
   letter-spacing: 0;
   color: #2f2b27;
-  max-width: 100%;
-  padding-inline: 0.15em;
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  column-gap: 0.28em;
+  text-align: center;
+  white-space: nowrap;
 }
-.loginNameLine { display: inline-block; }
 .loginPrompt {
-  margin-bottom: 8px;
-  font-size: clamp(12px, 1.7vw, 16px);
+  margin: 0 0 6px;
+  font-size: clamp(11px, 1.6vw, 16px);
+  max-width: 18em;
 }
 .loginForm {
   position: relative;
   z-index: 2;
-  width: min(100%, 260px);
+  width: min(100%, 240px);
+  margin-top: 2px;
   text-align: center;
 }
 .loginForm label,
@@ -201,7 +199,7 @@ a { color: inherit; }
 }
 .loginForm button {
   width: auto;
-  margin-top: 14px;
+  margin-top: 10px;
   padding: 4px 8px;
   border: 0;
   background: transparent;
@@ -348,7 +346,8 @@ a { color: inherit; }
   z-index: 40;
   display: grid;
   justify-items: center;
-  padding: 18px 64px 16px;
+  align-content: center;
+  padding: 16px 56px;
   background: #f7f3ec;
   color: var(--dusty-blue);
 }
@@ -359,12 +358,18 @@ a { color: inherit; }
   font-weight: 400;
   line-height: 1;
   color: var(--dusty-blue);
+  text-align: center;
+  width: 100%;
 }
 .siteNav {
   display: flex;
   justify-content: center;
-  gap: clamp(18px, 4vw, 42px);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(16px, 3.5vw, 42px);
+  width: 100%;
   margin-top: 10px;
+  padding: 0;
 }
 .siteNav a {
   text-decoration: none;
@@ -412,19 +417,21 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   justify-items: center;
-  padding: 16px 16px 44px;
+  padding: 16px 20px 48px;
   text-align: center;
 }
 
 .saveDateDoily {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 0;
+  right: 0;
+  display: block;
   justify-self: center;
-  margin-inline: auto;
-  width: min(90vw, calc(100svh - 210px), 820px);
-  height: min(90vw, calc(100svh - 210px), 820px);
+  align-self: center;
+  margin: 0 auto;
+  width: min(88vw, calc(100svh - 220px), 820px);
+  aspect-ratio: 1;
+  height: auto;
   filter: drop-shadow(0 18px 40px rgba(18, 16, 14, .28));
 }
 .saveDateDoily img {
@@ -433,7 +440,7 @@ a { color: inherit; }
   height: 100%;
   margin: 0 auto;
   object-fit: contain;
-  object-position: center;
+  object-position: center center;
   mix-blend-mode: screen;
 }
 .scrollCue { position: absolute; z-index: 2; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; }
@@ -797,16 +804,16 @@ a { color: inherit; }
 
 @media (max-width: 800px) {
   .sectionPad { padding: 82px 22px; }
-  .siteHeader { padding: 14px 52px 12px 18px; }
+  .siteHeader {
+    padding: 14px 44px;
+  }
   .siteNames {
     font-size: clamp(20px, 5.6vw, 28px);
-    padding-inline: 4px;
   }
   .siteNav { gap: 14px; }
   .siteNav a { font-size: 9px; letter-spacing: .14em; }
   .saveDateDoily {
-    width: min(86vw, calc(100svh - 200px), 640px);
-    height: min(86vw, calc(100svh - 200px), 640px);
+    width: min(84vw, calc(100svh - 210px), 640px);
   }
   .welcomeSection { min-height: auto; grid-template-columns: 1fr; gap: 50px; }
   .welcomeCopy { max-width: 92%; }
@@ -829,18 +836,37 @@ a { color: inherit; }
   .choiceGrid.two { grid-template-columns: 1fr; }
   .fieldRow { grid-template-columns: 1fr; }
   .loginScreen { padding: 24px 14px; }
-  .loginCard { width: min(92vw, 560px); }
-  .loginCardInner { padding: 18% 15% 15%; }
-  .loginCard h1 {
-    margin-bottom: 10px;
-    font-size: clamp(24px, 7.2vw, 36px);
-    line-height: 1.02;
-    flex-direction: column;
-    align-items: center;
-    row-gap: 0;
-    column-gap: 0;
+  .loginCard { width: min(94vw, 560px); }
+  .loginCardInner {
+    inset: 19% 12% 18%;
   }
-  .loginForm { width: min(100%, 210px); }
+  .loginEyebrow { font-size: 12px; }
+  .loginFrom { font-size: 11px; margin-top: 2px; }
+  .loginCard h1 {
+    margin: 2px 0 6px;
+    font-size: clamp(17px, 4.8vw, 26px);
+    line-height: 1.08;
+    white-space: nowrap;
+  }
+  .loginPrompt {
+    margin-bottom: 4px;
+    font-size: 11px;
+    max-width: 16em;
+    line-height: 1.35;
+  }
+  .loginForm { width: min(100%, 180px); }
+  .loginForm input {
+    padding: 4px 2px 6px;
+    font-size: 15px;
+  }
+  .loginForm button {
+    margin-top: 6px;
+    font-size: 12px;
+  }
+  .loginForm .formError {
+    margin-top: 6px;
+    font-size: 11px;
+  }
   .envelopeScreen { padding: 24px 18px 20px; }
   .envelopeButton { width: min(84vw, 400px); }
   .staySection { padding: 72px 18px; }
@@ -862,10 +888,9 @@ a { color: inherit; }
   }
   .envelopeDear { font-size: 17px; margin-bottom: 10px; }
   .saveDateDoily {
-    width: min(84vw, 70svh, 420px);
-    height: min(84vw, 70svh, 420px);
+    width: min(82vw, 68svh, 420px);
   }
-  .heroContent { padding: 12px 14px 40px; }
+  .heroContent { padding: 12px 18px 44px; }
   .siteNav { gap: 10px; flex-wrap: wrap; justify-content: center; }
   .heroLocation { font-size: 9px; }
   .heroDate { font-size: 16px; }
