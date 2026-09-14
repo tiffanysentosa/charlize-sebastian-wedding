@@ -1,6 +1,6 @@
-# Charlize & Sebastian — Wedding Website
+# Sebastian & Charlize — Wedding Website
 
-Mobile-first Next.js wedding invitation for Charlize Sentosa & Sebastian Suherman, designed for Vercel.
+Mobile-first Next.js wedding invitation for Sebastian Suherman & Charlize Sentosa, designed for Vercel.
 
 ## What is already built
 
@@ -68,7 +68,7 @@ For the first production version, guest access is controlled by the server-only 
 Example:
 
 ```env
-GUESTS_JSON=[{"id":"guest-001","name":"Jeremy","passcode":"paradise","scheduleType":"extended","plusOneAllowed":true},{"id":"guest-002","name":"Sarah","passcode":"sandbar","scheduleType":"standard","plusOneAllowed":false}]
+GUESTS_JSON=[{"id":"guest-001","name":"Jeremy","passcode":"paradise","scheduleType":"extended","hotelType":"renaissance","plusOneAllowed":true},{"id":"guest-002","name":"Sarah","passcode":"sandbar","scheduleType":"standard","hotelType":"st-regis","plusOneAllowed":false}]
 ```
 
 Allowed `scheduleType` values:
@@ -76,6 +76,13 @@ Allowed `scheduleType` values:
 ```text
 extended -> August 13–15
 standard -> August 14–15
+
+Allowed `hotelType` values:
+
+```text
+renaissance -> Renaissance Bali (default if omitted)
+st-regis    -> The St. Regis Bali Resort
+```
 ```
 
 For a larger list, the natural next step is moving the guest directory into a Google Sheet/database so you do not maintain a long JSON environment variable.

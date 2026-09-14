@@ -1,30 +1,66 @@
 import "server-only";
 import fs from "node:fs";
 import path from "node:path";
-import type { ScheduleType } from "./wedding";
+import type { HotelType, ScheduleType } from "./wedding";
 
 export type Guest = {
   id: string;
   name: string;
   passcode: string;
   scheduleType: ScheduleType;
+  /** When omitted, defaults to Renaissance. */
+  hotelType?: HotelType;
   /** When omitted, defaults to false. Set true per guest to show the +1 RSVP question. */
   plusOneAllowed?: boolean;
 };
 
 const demoGuests: Guest[] = [
   {
-    id: "test-extended",
-    name: "Extended Test Guest",
-    passcode: "sunset-tide",
+    id: "guest-renaissance-extended-plus",
+    name: "Jane Smith",
+    passcode: "paradise_in_bali",
     scheduleType: "extended",
+    hotelType: "renaissance",
     plusOneAllowed: true,
   },
   {
-    id: "test-standard",
-    name: "Standard Test Guest",
-    passcode: "seashell",
+    id: "guest-renaissance-extended",
+    name: "Alex Chen",
+    passcode: "tidal_pool",
+    scheduleType: "extended",
+    hotelType: "renaissance",
+    plusOneAllowed: false,
+  },
+  {
+    id: "guest-stregis-extended-plus",
+    name: "Tiffany Sentosa",
+    passcode: "coral_reefs_in_bali",
+    scheduleType: "extended",
+    hotelType: "st-regis",
+    plusOneAllowed: true,
+  },
+  {
+    id: "guest-stregis-extended",
+    name: "Maya Hartono",
+    passcode: "sea_glass",
+    scheduleType: "extended",
+    hotelType: "st-regis",
+    plusOneAllowed: false,
+  },
+  {
+    id: "guest-renaissance-standard-plus",
+    name: "Sarah Lee",
+    passcode: "sandbars_in_bali",
     scheduleType: "standard",
+    hotelType: "renaissance",
+    plusOneAllowed: true,
+  },
+  {
+    id: "guest-renaissance-standard",
+    name: "Daniel Okoye",
+    passcode: "palm_shade",
+    scheduleType: "standard",
+    hotelType: "renaissance",
     plusOneAllowed: false,
   },
 ];
@@ -32,6 +68,7 @@ const demoGuests: Guest[] = [
 function normalizeGuest(guest: Guest): Guest {
   return {
     ...guest,
+    hotelType: guest.hotelType === "st-regis" ? "st-regis" : "renaissance",
     plusOneAllowed: guest.plusOneAllowed ?? false,
   };
 }
@@ -79,6 +116,7 @@ export function publicGuest(guest: Guest) {
     id: guest.id,
     name: guest.name,
     scheduleType: guest.scheduleType,
+    hotelType: guest.hotelType === "st-regis" ? "st-regis" : "renaissance",
     plusOneAllowed: guest.plusOneAllowed ?? false,
   };
 }

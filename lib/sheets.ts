@@ -13,6 +13,7 @@ export type RsvpRecord = {
   email: string;
   whatsapp: string;
   plusOne: string;
+  plusOneName: string;
   welcomeDinner: string;
   weddingDay: string;
   brunch: string;
@@ -20,6 +21,7 @@ export type RsvpRecord = {
   partySize: string;
   dietaryRestrictions: string;
   message: string;
+  hotelType: string;
 };
 
 const headers = [
@@ -32,6 +34,7 @@ const headers = [
   "Email",
   "WhatsApp",
   "Plus One",
+  "Plus One Name",
   "Welcome Dinner",
   "Wedding Day",
   "Brunch",
@@ -39,6 +42,7 @@ const headers = [
   "Party Size",
   "Dietary Restrictions",
   "Message",
+  "Hotel",
 ];
 
 function normalizePrivateKey(raw: string) {
@@ -150,7 +154,7 @@ async function appendToGoogleSheet(record: RsvpRecord) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
   const sheetName = process.env.GOOGLE_SHEET_NAME || "RSVPs";
   const base = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values`;
-  const headerRange = `${sheetName}!A1:P1`;
+  const headerRange = `${sheetName}!A1:R1`;
 
   const headerResponse = await sheetsRequest(`${base}/${encodeURIComponent(headerRange)}`, token);
   const headerData = (await headerResponse.json()) as { values?: unknown[][] };
@@ -172,6 +176,7 @@ async function appendToGoogleSheet(record: RsvpRecord) {
     record.email,
     record.whatsapp,
     record.plusOne,
+    record.plusOneName,
     record.welcomeDinner,
     record.weddingDay,
     record.brunch,
@@ -179,9 +184,10 @@ async function appendToGoogleSheet(record: RsvpRecord) {
     record.partySize,
     record.dietaryRestrictions,
     record.message,
+    record.hotelType,
   ];
 
-  const appendRange = `${sheetName}!A:P`;
+  const appendRange = `${sheetName}!A:R`;
   const appendUrl = `${base}/${encodeURIComponent(appendRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
   await sheetsRequest(appendUrl, token, {
     method: "POST",

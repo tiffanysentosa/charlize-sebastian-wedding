@@ -4,20 +4,47 @@
     "name": "Jane Smith",
     "passcode": "paradise_in_bali",
     "scheduleType": "extended",
+    "hotelType": "renaissance",
     "plusOneAllowed": true
   },
   {
     "id": "guest-002",
-    "name": "Tiffany Sentosa",
-    "passcode": "coral_reefs_in_bali",
+    "name": "Alex Chen",
+    "passcode": "tidal_pool",
     "scheduleType": "extended",
+    "hotelType": "renaissance",
     "plusOneAllowed": false
   },
   {
     "id": "guest-003",
+    "name": "Tiffany Sentosa",
+    "passcode": "coral_reefs_in_bali",
+    "scheduleType": "extended",
+    "hotelType": "st-regis",
+    "plusOneAllowed": true
+  },
+  {
+    "id": "guest-004",
+    "name": "Maya Hartono",
+    "passcode": "sea_glass",
+    "scheduleType": "extended",
+    "hotelType": "st-regis",
+    "plusOneAllowed": false
+  },
+  {
+    "id": "guest-005",
     "name": "Sarah Lee",
     "passcode": "sandbars_in_bali",
     "scheduleType": "standard",
+    "hotelType": "renaissance",
+    "plusOneAllowed": true
+  },
+  {
+    "id": "guest-006",
+    "name": "Daniel Okoye",
+    "passcode": "palm_shade",
+    "scheduleType": "standard",
+    "hotelType": "renaissance",
     "plusOneAllowed": false
   }
 ]

@@ -2,20 +2,19 @@
 
 import Image from "next/image";
 import { FormEvent, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
-import { wedding, type ScheduleType } from "@/lib/wedding";
+import { wedding, type HotelType, type ScheduleType } from "@/lib/wedding";
 
 type PublicGuest = {
   id: string;
   name: string;
   scheduleType: ScheduleType;
+  hotelType: HotelType;
   plusOneAllowed: boolean;
 };
 
 const MUSIC_SRC = "/audio/le-cygne.mp3";
 
 type Phase = "checking" | "login" | "envelope" | "opening" | "site";
-
-type Countdown = { days: number; hours: number; minutes: number; seconds: number };
 
 function scrollToSection(event: MouseEvent<HTMLAnchorElement>, sectionId: string) {
   event.preventDefault();
@@ -31,18 +30,6 @@ function scrollToSection(event: MouseEvent<HTMLAnchorElement>, sectionId: string
   });
 
   history.pushState(null, "", `#${sectionId}`);
-}
-
-function getCountdown(): Countdown | null {
-  const target = new Date(wedding.ceremonyIso).getTime();
-  const distance = target - Date.now();
-  if (distance <= 0) return null;
-  return {
-    days: Math.floor(distance / 86_400_000),
-    hours: Math.floor((distance / 3_600_000) % 24),
-    minutes: Math.floor((distance / 60_000) % 60),
-    seconds: Math.floor((distance / 1000) % 60),
-  };
 }
 
 function Login({
@@ -102,7 +89,7 @@ function Login({
       />
       <section className="loginCard" aria-label="Private wedding invitation">
         <Image
-          src="/images/ivory-embossed-card.png"
+          src="/images/SC%20Password%20Card.png"
           alt=""
           fill
           priority
@@ -112,7 +99,7 @@ function Login({
         <div className="loginCardInner">
           <p className="loginEyebrow">a private invitation</p>
           <p className="loginFrom">from</p>
-          <h1>Charlize and Sebastian</h1>
+          <h1>Sebastian and Charlize</h1>
           <p className="loginPrompt">please enter your invitation code below</p>
           <form onSubmit={submit} className="loginForm">
             <label htmlFor="passcode" className="visuallyHidden">Invitation code</label>
@@ -150,7 +137,7 @@ function Envelope({ guest, opening, onOpen }: { guest: PublicGuest; opening: boo
       <div className="envelopeHeading">
         <p className="envelopeDear">Dear {guest.name}</p>
         <p className="envelopeMailFrom">You&apos;ve got mail from</p>
-        <h1><span>Charlize</span><i>&amp;</i><span>Sebastian</span></h1>
+        <h1><span>Sebastian</span><i>&amp;</i><span>Charlize</span></h1>
       </div>
 
       <button className="envelopeButton" onClick={onOpen} disabled={opening} aria-label="Open the wedding invitation">
@@ -166,8 +153,8 @@ function Envelope({ guest, opening, onOpen }: { guest: PublicGuest; opening: boo
           </div>
           <div className="envelopeLayer envelopeCard">
             <Image
-              src="/images/2-save-the-date-doily.png"
-              alt="Save the Date"
+              src="/images/SC%20Lace%20Doily.png"
+              alt="Sebastian Suherman and Charlize Sentosa"
               fill
               sizes="(max-width: 800px) 90vw, 440px"
               priority
@@ -193,8 +180,8 @@ function SaveTheDateDoily() {
   return (
     <div className="saveDateDoily">
       <Image
-        src="/images/lace-doily-charlize-and-sebastian.png"
-        alt="We are getting married. Charlize Sentosa and Sebastian Suherman. Save the date, August 14, 2027, Nusa Dua, Bali."
+        src="/images/SC%20Lace%20Doily.png"
+        alt="We are getting married. Sebastian Suherman and Charlize Sentosa. Save the date, August 14, 2027, Nusa Dua, Bali."
         width={1254}
         height={1254}
         priority
@@ -203,52 +190,68 @@ function SaveTheDateDoily() {
   );
 }
 
-function CountdownBlock() {
-  const [countdown, setCountdown] = useState<Countdown | null>(() => getCountdown());
-  useEffect(() => {
-    const timer = window.setInterval(() => setCountdown(getCountdown()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  if (!countdown) return <p className="weddingWeekend">It’s wedding weekend.</p>;
-
-  const items = [
-    [countdown.days, "Days"],
-    [countdown.hours, "Hours"],
-    [countdown.minutes, "Minutes"],
-    [countdown.seconds, "Seconds"],
-  ] as const;
-
+function TravelDetails() {
   return (
-    <div className="countdown" aria-label="Countdown to the ceremony">
-      {items.map(([value, label]) => (
-        <div key={label}>
-          <strong>{String(value).padStart(2, "0")}</strong>
-          <span>{label}</span>
+    <section id="travel" className="infoSection">
+      <div className="infoArt">
+        <Image
+          src="/images/wallart.png"
+          alt=""
+          fill
+          sizes="(max-width: 800px) 100vw, 50vw"
+        />
+      </div>
+      <div className="infoCopy">
+        <div className="infoTitle">
+          <p className="infoThe">The</p>
+          <h2>Details</h2>
         </div>
-      ))}
-    </div>
+        <article className="infoBlock">
+          <h3>Airfare</h3>
+          <p>
+            Guests are kindly asked to book their own flights. We recommend arriving in Bali no later than August 12th to allow time for rest and sightseeing before the wedding.
+          </p>
+        </article>
+        <hr className="infoRule" />
+        <article className="infoBlock">
+          <h3>International travel</h3>
+          <p>
+            Foreign travelers can apply for a visa on arrival through the official immigration site of Indonesia for a visa that will be valid for 30 days.
+          </p>
+          <p>
+            International travelers can also get an e-sim on arrival at one of the phone kiosks at the Bali Airport.
+          </p>
+        </article>
+      </div>
+    </section>
   );
 }
 
-function Stay({ scheduleType }: { scheduleType: ScheduleType }) {
-  const stay = wedding.accommodations[scheduleType];
+function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelType: HotelType }) {
+  const hotel = wedding.accommodations.hotels[hotelType];
+  const nights = wedding.accommodations.nights[scheduleType];
+  const sameResort = hotelType === "st-regis";
+
   return (
     <section id="stay" className="staySection">
-      <Image
-        src="/images/log-in-background.png"
-        alt=""
-        fill
-        sizes="100vw"
-        className="stayBackdrop"
-      />
-      <div className="stayCard">
-        <p className="kicker">Your stay</p>
-        <h2>{wedding.accommodations.hotel}</h2>
-        <p className="stayDates">{stay.nights}</p>
-        <div className="stayRule" />
-        <p>{stay.detail}</p>
-        <p className="stayNote">The wedding itself is at The St. Regis Bali Resort, just nearby in Nusa Dua.</p>
+      <div className="stayBrand">
+        <p className="stayYour">Your</p>
+        <h2>Stay</h2>
+        <div className="stayIcon">
+          <Image src="/images/sketch.png" alt="" width={1024} height={1536} />
+        </div>
+      </div>
+      <div className="stayCopy">
+        <p className="stayHotel">{hotel.name}</p>
+        <p className="stayDates">{nights}</p>
+        <p className="stayDetail">
+          We’ve reserved you a room at {hotel.name} for {nights.replace(", 2027", "")}. Please let us know on your RSVP if you want to stay with us.
+        </p>
+        <p className="stayNote">
+          {sameResort
+            ? "The wedding itself is at The St. Regis, so you’ll already be at the celebration."
+            : "The wedding itself is at The St. Regis, and transportation will be provided on the wedding day."}
+        </p>
       </div>
     </section>
   );
@@ -256,23 +259,63 @@ function Stay({ scheduleType }: { scheduleType: ScheduleType }) {
 
 function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
   const schedule = wedding.schedules[scheduleType];
+  const friday = schedule.events.find((event) => event.id === "welcome");
+  const saturday = schedule.events.filter((event) => event.dateLabel.startsWith("Saturday"));
+  const sunday = schedule.events.find((event) => event.id === "brunch");
+  const days = [
+    friday ? {
+      id: "friday",
+      date: "Friday, August 13th",
+      title: "Welcome Dinner",
+      icon: friday.icon,
+      dressCode: friday.dressCode,
+      events: [friday],
+    } : null,
+    {
+      id: "saturday",
+      date: "Saturday, August 14th",
+      title: "The Wedding Day",
+      icon: null,
+      dressCode: saturday.find((event) => event.dressCode)?.dressCode,
+      events: saturday,
+    },
+    sunday ? {
+      id: "sunday",
+      date: "Sunday, August 15th",
+      title: "Farewell Brunch",
+      icon: sunday.icon,
+      dressCode: sunday.dressCode,
+      events: [sunday],
+    } : null,
+  ].filter((day) => day !== null);
+
   return (
     <section id="schedule" className="scheduleSection sectionPad">
-      <div className="sectionTitleRow">
-        <h2>Order of events</h2>
-        <p>{schedule.dateRange}</p>
+      <div className="scheduleTitle">
+        <p className="scheduleThe">The</p>
+        <h2>Wedding<br />Weekend</h2>
       </div>
-      <div className={`eventsBoard eventsBoard-${schedule.events.length}`}>
-        {schedule.events.map((event) => (
-          <article className="eventColumn" key={event.id}>
-            <div className="eventIcon">
-              <Image src={event.icon} alt="" width={280} height={280} />
+      <div className={`weekendBoard weekendBoard-${days.length}`}>
+        {days.map((day) => (
+          <article className={`weekendDay weekendDay-${day.id}`} key={day.id}>
+            {day.icon ? (
+              <div className="weekendIcon">
+                <Image src={day.icon} alt="" width={280} height={280} />
+              </div>
+            ) : null}
+            <h3>{day.title}</h3>
+            <p className="weekendDate">{day.date}</p>
+            {day.dressCode ? <p className="weekendDress">Dress code: {day.dressCode}</p> : null}
+            <div className="weekendEvents">
+              {day.events.map((event) => (
+                <div className="weekendEvent" key={event.id}>
+                  {day.events.length > 1 ? <p className="weekendEventTitle">{event.title}</p> : null}
+                  {event.venue ? <p className="weekendMeta">{event.venue}</p> : null}
+                  {event.detail ? <p className="weekendMeta">{event.detail}</p> : null}
+                  {event.time ? <p className="weekendMeta">{event.time}</p> : null}
+                </div>
+              ))}
             </div>
-            <h3>{event.title}</h3>
-            <p className="eventVenue">{event.venue}</p>
-            {event.detail ? <p className="eventDetail">{event.detail}</p> : null}
-            <p className="eventWhen">{event.dateLabel}{event.time ? ` · ${event.time}` : ""}</p>
-            {event.dressCode ? <p className="eventDress">{event.dressCode}</p> : null}
           </article>
         ))}
       </div>
@@ -329,7 +372,7 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
   if (status === "success") {
     return (
       <div className="rsvpSuccess" role="status">
-        <div className="successMonogram">C <span>&amp;</span> S</div>
+        <div className="successMonogram">S <span>&amp;</span> C</div>
         <h3>Thank you, {guest.name}.</h3>
         <p>{message}</p>
         <button type="button" className="textButton" onClick={() => setStatus("idle")}>Update response</button>
@@ -340,8 +383,8 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
   return (
     <form className="rsvpForm" onSubmit={submit}>
       <div className="formIntro">
-        <p className="kicker">Kindly reply</p>
         <h2>RSVP</h2>
+        <p className="formLead">Make our day special</p>
         <p>We would be delighted to celebrate with you, {guest.name}.</p>
       </div>
 
@@ -378,19 +421,27 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
           </div>
 
           {hasPlusOne ? (
-            <fieldset>
-              <legend>Will you be bringing a plus one?</legend>
-              <div className="choiceGrid two compact">
-                <label>
-                  <input required type="radio" name="plusOne" value="yes" onChange={() => setPlusOne("yes")} />
-                  Yes
+            <>
+              <fieldset>
+                <legend>Will you be bringing a plus one?</legend>
+                <div className="choiceGrid two compact">
+                  <label>
+                    <input required type="radio" name="plusOne" value="yes" onChange={() => setPlusOne("yes")} />
+                    Yes
+                  </label>
+                  <label>
+                    <input required type="radio" name="plusOne" value="no" onChange={() => setPlusOne("no")} />
+                    No
+                  </label>
+                </div>
+              </fieldset>
+              {plusOne === "yes" ? (
+                <label className="fieldLabel">
+                  Name of your plus one
+                  <input name="plusOneName" required autoComplete="name" placeholder="Full name" />
                 </label>
-                <label>
-                  <input required type="radio" name="plusOne" value="no" onChange={() => setPlusOne("no")} />
-                  No
-                </label>
-              </div>
-            </fieldset>
+              ) : null}
+            </>
           ) : (
             <input type="hidden" name="plusOne" value="not-allotted" />
           )}
@@ -398,8 +449,10 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
 
           {guest.scheduleType === "extended" ? (
             <fieldset>
-              <legend>Stay at the Renaissance</legend>
-              <p className="fieldHint">We’d love to host you at the Renaissance Bali. Would you like a room for one or two nights (August 13–15)?</p>
+              <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
+              <p className="fieldHint">
+                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name} if you’d like to stay with us. Would you like one or two nights (August 13–15)?
+              </p>
               <div className="choiceGrid compact">
                 <label><input type="radio" name="accommodation" value="two-nights" required />Two nights (August 13–15)</label>
                 <label><input type="radio" name="accommodation" value="one-night" required />One night</label>
@@ -408,8 +461,10 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
             </fieldset>
           ) : (
             <fieldset>
-              <legend>Stay at the Renaissance</legend>
-              <p className="fieldHint">We’ve reserved a room for you at the Renaissance Bali for the night of August 14. Would you like to stay with us?</p>
+              <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
+              <p className="fieldHint">
+                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name} for the night of August 14. Would you like to stay with us?
+              </p>
               <div className="choiceGrid two compact">
                 <label><input type="radio" name="accommodation" value="yes" required />Yes, please</label>
                 <label><input type="radio" name="accommodation" value="no" required />No, thank you</label>
@@ -472,7 +527,7 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
   return (
     <main className="siteRoot">
       <header className="siteHeader">
-        <p className="siteNames">Charlize and Sebastian</p>
+        <p className="siteNames">Sebastian and Charlize</p>
         <nav className="siteNav" aria-label="Wedding navigation">
           <a href="#details" onClick={(event) => scrollToSection(event, "details")}>Details</a>
           <a href="#schedule" onClick={(event) => scrollToSection(event, "schedule")}>Schedule</a>
@@ -499,58 +554,67 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
       </section>
 
       <section id="details" className="welcomeSection sectionPad">
+        <div className="introTrio">
+          <p className="introSide introSide-left">Our love<br />for the sea</p>
+          <div className="introPortrait">
+            <Image
+              src="/images/Couple Photo 1.png"
+              alt="Sebastian and Charlize sitting together"
+              width={1254}
+              height={1254}
+              sizes="(max-width: 800px) 86vw, 420px"
+            />
+          </div>
+          <p className="introSide introSide-right">(and each<br />other)</p>
+        </div>
         <div className="welcomeCopy">
-          <Image
-            src="/images/CS-logo.png"
-            alt=""
-            width={1254}
-            height={1254}
-            className="detailsLogo"
-          />
-          <p className="detailsEyebrow">
-            St. Regis Bali | {guest.scheduleType === "extended" ? "August 13th – 15th" : "August 14th – 15th"}
-          </p>
           <p className="detailsBody">
             We can’t wait to celebrate with you in Bali. Join us for a weekend by the sea at The St. Regis Bali Resort in Nusa Dua. Ceremony on the beach, followed by cocktails, dinner and dancing.
           </p>
           <p className="detailsLove">with love,</p>
-          <p className="detailsSignoff">Charlize and Sebastian</p>
+          <p className="detailsSignoff">Sebastian and Charlize</p>
         </div>
-        <div className="framedPortrait">
-          <Image
-            src="/images/Couple Photo 1.png"
-            alt="Charlize and Sebastian sitting together"
-            width={1254}
-            height={1254}
-            sizes="(max-width: 800px) 92vw, 48vw"
-          />
-        </div>
-      </section>
-
-      <section className="countdownSection">
-        <p className="kicker">Forever starts in</p>
-        <CountdownBlock />
       </section>
 
       <Schedule scheduleType={guest.scheduleType} />
-      <Stay scheduleType={guest.scheduleType} />
-
-      <section className="photoBreak">
-        <Image src="/images/couple-1.webp" alt="Charlize and Sebastian embracing in a garden" fill sizes="100vw" />
-        <div className="photoBreakOverlay">
-          <p>See you in Bali</p>
-          <span>C · S</span>
-        </div>
-      </section>
+      <TravelDetails />
+      <Stay scheduleType={guest.scheduleType} hotelType={guest.hotelType} />
 
       <section id="rsvp" className="rsvpSection sectionPad">
         <RsvpForm guest={guest} />
       </section>
 
-      <footer className="siteFooter">
-        <p>Charlize Sentosa &amp; Sebastian Suherman</p>
-        <p>Nusa Dua, Bali · August 2027</p>
-      </footer>
+      <section id="contact" className="contactSection">
+        <div className="contactCopy">
+          <div className="contactTitle">
+            <p className="contactSee">see you in</p>
+            <h2>Bali</h2>
+          </div>
+          <p className="contactNote">
+            Please don’t hesitate to contact us below if you have any questions or concerns.
+          </p>
+          <div className="contactPeople">
+            <p>Sebastian Suherman</p>
+            <p>Charlize Sentosa</p>
+          </div>
+          <div className="contactLogo">
+            <Image
+              src="/images/SC%20Logo.png"
+              alt="Sebastian and Charlize"
+              width={800}
+              height={1000}
+            />
+          </div>
+        </div>
+        <div className="contactPhoto">
+          <Image
+            src="/images/couple-1.webp"
+            alt="Sebastian and Charlize"
+            fill
+            sizes="(max-width: 800px) 100vw, 50vw"
+          />
+        </div>
+      </section>
     </main>
   );
 }
@@ -645,7 +709,7 @@ export default function WeddingExperience() {
     setMusicPlaying(false);
   }
 
-  if (phase === "checking") return <div className="loadingScreen"><span>CS · SS</span></div>;
+  if (phase === "checking") return <div className="loadingScreen"><span>SS · CS</span></div>;
   if (phase === "login") {
     return <Login onLogin={onLogin} onUnlockMusic={unlockMusicFromGesture} onStopMusic={stopMusic} />;
   }

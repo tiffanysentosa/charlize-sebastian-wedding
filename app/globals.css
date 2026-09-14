@@ -8,12 +8,12 @@
   --dusty-blue: #7a91b3;
   --champagne: #7a91b3;
   --line: rgba(90, 104, 128, 0.22);
-  --font-display: var(--font-serif), Georgia, serif;
+  --font-display: var(--font-display-face), "Playfair Display SC", "Times New Roman", serif;
   --font-sans: var(--font-serif), Georgia, serif;
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--ivory); }
+html { scroll-behavior: smooth; background: var(--ivory); overflow-x: hidden; }
 body {
   margin: 0;
   color: var(--ink);
@@ -22,6 +22,7 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -319,6 +320,11 @@ a { color: inherit; }
   transform: translateY(2%);
   transition: transform 1.55s cubic-bezier(.18, .72, .17, 1);
 }
+.envelopeCard img {
+  object-fit: contain;
+  object-position: center 38%;
+  padding: 7% 8% 16%;
+}
 .envelopeFront { z-index: 3; }
 .openLabel {
   display: block;
@@ -337,8 +343,10 @@ a { color: inherit; }
 .siteRoot { background: var(--paper); overflow: clip; }
 #details,
 #schedule,
+#travel,
 #stay,
-#rsvp { scroll-margin-top: 96px; }
+#rsvp,
+#contact { scroll-margin-top: 96px; }
 .sectionPad { padding: 110px max(22px, calc((100vw - 1180px) / 2)); }
 .siteHeader {
   position: sticky;
@@ -449,72 +457,71 @@ a { color: inherit; }
 @keyframes scrollLine { 0%,100% { transform: scaleY(.45); transform-origin: top; opacity: .45; } 50% { transform: scaleY(1); opacity: 1; } }
 
 .welcomeSection {
-  min-height: 95vh;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6vw;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  background:
-    repeating-linear-gradient(0deg, rgba(95,80,63,.03) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.4) 0 1px, transparent 1px 4px),
-    #f3eee6;
+  background: #f7f3ec;
+}
+.introTrio {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px 28px;
+  width: min(100%, 1080px);
+}
+.introSide {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(13px, 1.35vw, 16px);
+  font-weight: 400;
+  letter-spacing: .2em;
+  line-height: 1.7;
+  text-transform: uppercase;
+  text-align: center;
+  color: #2c2a27;
+}
+.introPortrait {
+  width: min(42vw, 420px);
+}
+.introPortrait img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .welcomeCopy {
-  max-width: 460px;
-  margin: 0 auto;
+  max-width: 620px;
+  margin: 8px auto 0;
   text-align: center;
-}
-.detailsLogo {
-  display: block;
-  width: 78px;
-  height: auto;
-  margin: 0 auto 22px;
-}
-.detailsEyebrow {
-  margin: 0 0 28px;
-  font-family: var(--font-serif);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: #3d3a36;
 }
 .detailsBody {
   margin: 0 auto;
-  max-width: 380px;
+  max-width: 560px;
   font-family: var(--font-serif);
   font-size: 17px;
   line-height: 1.85;
   color: #3d3a36;
 }
 .detailsLove {
-  margin: 32px 0 0;
+  margin: 36px 0 0;
   font-family: var(--font-serif);
-  font-size: 16px;
+  font-size: 15px;
   font-style: italic;
   color: #3d3a36;
 }
 .detailsSignoff {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-family: var(--font-script), "Monsieur La Doulaise", cursive;
-  font-size: clamp(36px, 4.5vw, 52px);
+  font-size: clamp(40px, 5vw, 58px);
   font-weight: 400;
   line-height: 1.1;
   color: #2c2a27;
 }
-.welcomeCopy h2,
-.sectionTitleRow h2,
 .venueCopy h2,
-.formIntro h2 { margin: 0; font-family: var(--font-display); font-size: clamp(47px, 6vw, 78px); font-weight: 400; line-height: .98; letter-spacing: -.035em; }
-.sectionTitleRow h2 {
-  font-family: var(--font-script), "Monsieur La Doulaise", cursive;
-  letter-spacing: 0;
-  line-height: 1.05;
-}
+.formIntro h2 { margin: 0; font-family: var(--font-display); font-size: clamp(47px, 6vw, 78px); font-weight: 400; line-height: .98; letter-spacing: -.02em; }
 .formIntro h2 {
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: clamp(52px, 7vw, 72px);
-  letter-spacing: .04em;
+  font-size: clamp(56px, 8vw, 88px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
   color: #2c2a27;
 }
 .framedPortrait { width: 100%; }
@@ -526,32 +533,12 @@ a { color: inherit; }
 .photoBreak img { object-fit: cover; }
 .portraitOne { aspect-ratio: .69; max-height: 760px; }
 
-.countdownSection {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding: 95px 22px 105px;
-  text-align: center;
-  background: var(--dusty-blue);
-  color: #fff;
+.weddingWeekend {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-style: italic;
+  color: #5a6b82;
 }
-.countdownSection::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: url("/images/log-in-background.png") center / cover;
-}
-.countdownSection .kicker,
-.countdown,
-.weddingWeekend { position: relative; z-index: 1; }
-.countdownSection .kicker { color: #fff; }
-.countdown { display: grid; grid-template-columns: repeat(4, minmax(0, 140px)); justify-content: center; margin: 34px auto 0; }
-.countdown > div { padding: 0 12px; border-right: 1px solid rgba(255,255,255,.16); }
-.countdown > div:last-child { border-right: 0; }
-.countdown strong { display: block; font-family: var(--font-display); font-size: clamp(42px,7vw,74px); font-weight: 400; line-height: 1; }
-.countdown span { display: block; margin-top: 9px; font-size: 8px; text-transform: uppercase; letter-spacing: .2em; color: #fff; }
-.weddingWeekend { font-family: var(--font-display); font-size: 48px; }
 
 .editorialSection { display: grid; grid-template-columns: 1.05fr .8fr; gap: 10vw; align-items: center; min-height: 100vh; background: #f8f6f1; }
 .editorialImage { position: relative; overflow: hidden; }
@@ -563,144 +550,242 @@ a { color: inherit; }
 .editorialCopy > p:last-child { font-family: var(--font-display); font-size: 27px; line-height: 1.3; color: #5f5952; }
 
 .scheduleSection {
-  background:
-    repeating-linear-gradient(0deg, rgba(95,80,63,.03) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.4) 0 1px, transparent 1px 4px),
-    #f3eee6;
+  background: #7f96b4;
+  color: #f4efe6;
+  padding-top: 108px;
+  padding-bottom: 120px;
 }
-.sectionTitleRow { text-align: center; margin-bottom: 56px; }
-.sectionTitleRow > p:last-child { margin: 16px 0 0; font-family: var(--font-display); font-size: 20px; color: var(--muted-ink); }
-.eventsBoard {
+.scheduleTitle {
+  text-align: center;
+  margin-bottom: 108px;
+}
+.scheduleThe {
+  margin: 0;
+  font-family: var(--font-script), "Monsieur La Doulaise", cursive;
+  font-size: clamp(52px, 6.4vw, 78px);
+  font-weight: 400;
+  line-height: .55;
+  color: #f4efe6;
+}
+.scheduleTitle h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(46px, 6.4vw, 78px);
+  font-weight: 400;
+  letter-spacing: .12em;
+  line-height: .95;
+  text-transform: uppercase;
+  color: #f4efe6;
+}
+.weekendBoard {
   display: grid;
-  max-width: 1180px;
+  max-width: 1120px;
   margin: 0 auto;
   align-items: start;
+  gap: 0 96px;
 }
-.eventsBoard-4 { grid-template-columns: repeat(4, 1fr); }
-.eventsBoard-5 { grid-template-columns: repeat(5, 1fr); }
-.eventColumn {
-  padding: 0 18px 8px;
+.weekendBoard-3 { grid-template-columns: 1fr 1fr 1fr; }
+.weekendBoard-2 { grid-template-columns: 1fr 1fr; }
+.weekendDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  border-right: 1px solid rgba(90, 104, 128, .22);
+  padding: 0;
 }
-.eventColumn:last-child { border-right: 0; }
-.eventIcon {
+.weekendIcon {
   display: grid;
   place-items: center;
-  height: 120px;
-  margin-bottom: 18px;
+  height: 86px;
+  margin-bottom: 26px;
 }
-.eventIcon img {
+.weekendIcon img {
   width: auto;
-  height: 110px;
-  max-width: 100%;
+  height: 78px;
+  max-width: 140px;
   object-fit: contain;
 }
-.eventColumn h3 {
-  margin: 0 0 14px;
-  font-family: var(--font-serif);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  line-height: 1.35;
-  color: #2c2a27;
+.weekendDay h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.1vw, 28px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: #f4efe6;
 }
-.eventVenue,
-.eventWhen,
-.eventDress,
-.eventDetail {
+.weekendDate {
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.45;
+  color: #f4efe6;
+}
+.weekendDress {
+  margin: 2px 0 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.45;
+  color: #f4efe6;
+}
+.weekendEvents {
+  margin-top: 38px;
+  display: grid;
+  gap: 38px;
+  width: 100%;
+}
+.weekendEventTitle {
   margin: 0;
   font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #f4efe6;
+}
+.weekendMeta {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.45;
+  color: #f4efe6;
+}
+
+.infoSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100svh;
+  background: #f7f3ec;
+}
+.infoArt {
+  position: relative;
+  min-height: 100svh;
+}
+.infoArt img {
+  object-fit: cover;
+  object-position: center;
+}
+.infoCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 72px;
+  text-align: center;
+}
+.infoTitle { margin-bottom: 48px; }
+.infoThe {
+  margin: 0;
+  font-family: var(--font-script), "Monsieur La Doulaise", cursive;
+  font-size: clamp(48px, 5.6vw, 68px);
+  font-weight: 400;
+  line-height: .55;
+  color: #2c2a27;
+}
+.infoTitle h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5.4vw, 64px);
+  font-weight: 400;
+  letter-spacing: .14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #2c2a27;
+}
+.infoBlock {
+  max-width: 420px;
+}
+.infoBlock h3 {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: #2c2a27;
+}
+.infoBlock p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.75;
   color: #3d3a36;
 }
-.eventVenue {
-  font-size: 13px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  line-height: 1.45;
-}
-.eventDetail {
-  margin-top: 6px;
-  font-size: 13px;
-  font-style: italic;
-  text-transform: none;
-  letter-spacing: 0;
-}
-.eventWhen {
-  margin-top: 10px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.eventDress {
-  margin-top: 8px;
-  font-size: 13px;
-  font-style: italic;
+.infoBlock p + p { margin-top: 16px; }
+.infoRule {
+  width: 72px;
+  height: 1px;
+  margin: 36px auto;
+  border: 0;
+  background: #2c2a27;
 }
 
 .staySection {
-  position: relative;
-  isolation: isolate;
   display: grid;
-  place-items: center;
-  min-height: 88svh;
-  padding: 90px 22px;
-  background: var(--dusty-blue);
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 100svh;
+  padding: 90px 8vw;
+  background: #7f96b4;
+  color: #f4efe6;
 }
-.stayBackdrop {
-  object-fit: cover;
-  pointer-events: none;
-}
-.stayCard {
-  position: relative;
-  z-index: 1;
-  width: min(92vw, 520px);
-  padding: 58px 40px 50px;
+.stayBrand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  background: #fffdf9;
-  color: var(--ink);
-  box-shadow: 0 22px 50px rgba(32, 36, 48, .2);
 }
-.stayCard .kicker { color: var(--dusty-blue); }
-.stayCard h2 {
-  margin: 0 auto;
-  max-width: 100%;
+.stayYour {
+  margin: 0;
   font-family: var(--font-script), "Monsieur La Doulaise", cursive;
-  font-size: clamp(42px, 8vw, 70px);
+  font-size: clamp(52px, 6vw, 78px);
   font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: 0;
-  padding-inline: 0.2em;
-  box-sizing: border-box;
-  /* Script flourishes (esp. R) sit optically left; nudge for true visual center */
-  transform: translateX(0.06em);
+  line-height: .5;
+  color: #f4efe6;
+}
+.stayBrand h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 86px);
+  font-weight: 400;
+  letter-spacing: .16em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #f4efe6;
+}
+.stayIcon {
+  margin-top: 36px;
+  width: min(42%, 220px);
+}
+.stayIcon img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .92;
+}
+.stayCopy {
+  max-width: 420px;
+  justify-self: center;
+  text-align: left;
+}
+.stayHotel {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.3;
+  color: #f4efe6;
 }
 .stayDates {
-  margin: 12px 0 0;
-  font-size: 11px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--muted-ink);
+  margin: 22px 0 0;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: #f4efe6;
 }
-.stayRule {
-  width: 42px;
-  height: 1px;
-  margin: 24px auto;
-  background: rgba(90, 104, 128, .35);
-}
-.stayCard > p:not(.kicker):not(.stayDates):not(.stayNote) {
-  margin: 0 auto;
-  max-width: 360px;
+.stayDetail,
+.stayNote {
+  margin: 22px 0 0;
+  font-family: var(--font-serif);
   font-size: 16px;
   line-height: 1.7;
-}
-.stayNote {
-  margin: 18px auto 0;
-  max-width: 340px;
-  font-size: 13px;
-  font-style: italic;
-  color: var(--muted-ink);
-  line-height: 1.65;
+  color: #f4efe6;
 }
 
 .venueSection { display: grid; grid-template-columns: .65fr 1.35fr; gap: 8vw; background: #f7f4ee; align-items: start; }
@@ -713,23 +798,86 @@ a { color: inherit; }
 .mosaicWide { grid-column: 1 / -1; aspect-ratio: 1.5; }
 .mosaicTall { aspect-ratio: .72; }
 
-.photoBreak { position: relative; height: min(95vh, 900px); min-height: 620px; overflow: hidden; }
-.photoBreak img { object-position: center 45%; }
-.photoBreak::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(22,20,18,.46), rgba(22,20,18,0) 55%); }
-.photoBreakOverlay { position: absolute; z-index: 2; left: 0; right: 0; bottom: 62px; text-align: center; color: white; }
-.photoBreakOverlay p { margin: 0; font-family: var(--font-script), "Monsieur La Doulaise", cursive; font-size: clamp(48px, 8vw, 86px); font-weight: 400; }
-.photoBreakOverlay span { display: block; margin-top: 12px; font-size: 9px; letter-spacing: .28em; }
-
 .rsvpSection {
-  background:
-    repeating-linear-gradient(0deg, rgba(95,80,63,.03) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.4) 0 1px, transparent 1px 4px),
-    #f3eee6;
+  background: #f7f3ec;
 }
 .rsvpForm { max-width: 700px; margin: 0 auto; }
-.formIntro { text-align: center; margin-bottom: 58px; }
-.formIntro .kicker { font-size: 13px; letter-spacing: .18em; color: #4a453f; }
-.formIntro > p:last-child { margin: 20px auto 0; max-width: 480px; color: #3d3a36; font-family: var(--font-serif); font-size: 22px; line-height: 1.55; }
+.formIntro { text-align: center; margin-bottom: 72px; }
+.formLead {
+  margin: 28px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2.4vw, 28px);
+  color: #2c2a27;
+}
+.formIntro > p:last-child { margin: 12px auto 0; max-width: 480px; color: #3d3a36; font-family: var(--font-serif); font-size: 17px; line-height: 1.6; }
+
+.contactSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: min(72svh, 720px);
+  background: #7f96b4;
+  color: #f4efe6;
+}
+.contactCopy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 52px 8vw 40px;
+}
+.contactTitle { margin-bottom: 36px; }
+.contactSee {
+  margin: 0;
+  font-family: var(--font-script), "Monsieur La Doulaise", cursive;
+  font-size: clamp(48px, 5.6vw, 72px);
+  font-weight: 400;
+  line-height: .55;
+  color: #f4efe6;
+}
+.contactTitle h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(52px, 6.4vw, 80px);
+  font-weight: 400;
+  letter-spacing: .16em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #f4efe6;
+}
+.contactNote {
+  margin: 0 0 32px;
+  max-width: 280px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.7;
+  color: #f4efe6;
+}
+.contactPeople {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.5;
+}
+.contactLogo {
+  width: 88px;
+  margin-top: auto;
+}
+.contactLogo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .92;
+}
+.contactPhoto {
+  position: relative;
+  min-height: 0;
+}
+.contactPhoto img {
+  object-fit: cover;
+  object-position: center 58%;
+}
 .rsvpForm fieldset { border: 0; padding: 0; margin: 0 0 35px; }
 .rsvpForm legend { width: 100%; margin-bottom: 14px; font-size: 15px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #3d3a36; }
 .choiceGrid { display: grid; gap: 10px; }
@@ -781,48 +929,62 @@ a { color: inherit; }
 .rsvpSuccess p { color: var(--muted-ink); }
 .textButton { border: 0; border-bottom: 1px solid currentColor; background: transparent; margin-top: 20px; padding: 4px 0; text-transform: uppercase; letter-spacing: .15em; font-size: 9px; cursor: pointer; }
 
-.siteFooter { position: relative; padding: 72px 20px 82px; text-align: center; background: var(--dusty-blue); color: #fff; }
-.siteFooter p { margin: 5px 0; font-size: 8px; text-transform: uppercase; letter-spacing: .18em; color: rgba(255,255,255,.82); }
 
 @media (min-width: 900px) {
   .musicToggle:hover .musicText { display: inline; }
 }
 
 @media (max-width: 1100px) {
-  .eventsBoard-4,
-  .eventsBoard-5 { grid-template-columns: 1fr 1fr; gap: 36px 0; }
-  .eventColumn { padding: 0 16px 28px; border-right: 0; }
-  .eventColumn:nth-child(odd) { border-right: 1px solid rgba(90, 104, 128, .22); }
+  .weekendBoard-3,
+  .weekendBoard-2 { grid-template-columns: 1fr; gap: 56px; }
 }
 
 @media (min-width: 801px) {
   #details,
   #schedule,
+  #travel,
   #stay,
-  #rsvp { scroll-margin-top: 0; }
+  #rsvp,
+  #contact { scroll-margin-top: 0; }
 }
 
 @media (max-width: 800px) {
-  .sectionPad { padding: 82px 22px; }
+  .sectionPad { padding: 72px 20px; }
   .siteHeader {
-    padding: 14px 44px;
+    padding: 12px 40px 14px;
   }
   .siteNames {
     font-size: clamp(20px, 5.6vw, 28px);
   }
-  .siteNav { gap: 14px; }
-  .siteNav a { font-size: 9px; letter-spacing: .14em; }
+  .siteNav { gap: 12px; }
+  .siteNav a { font-size: 9px; letter-spacing: .12em; }
+  .videoHero {
+    min-height: 420px;
+    height: calc(100svh - 128px);
+  }
   .saveDateDoily {
     width: min(84vw, calc(100svh - 210px), 640px);
   }
-  .welcomeSection { min-height: auto; grid-template-columns: 1fr; gap: 50px; }
+  .introSide {
+    font-size: 12px;
+    letter-spacing: .12em;
+  }
+  .scheduleTitle { margin-bottom: 56px; }
+  .scheduleTitle h2 { font-size: clamp(36px, 11vw, 52px); letter-spacing: .08em; }
+  .formIntro h2 { font-size: clamp(42px, 14vw, 64px); letter-spacing: .1em; }
+  .welcomeSection { min-height: auto; }
+  .introTrio {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "photo photo"
+      "left right";
+    justify-items: center;
+    gap: 18px 12px;
+  }
+  .introPortrait { grid-area: photo; width: min(86vw, 420px); }
+  .introSide-left { grid-area: left; }
+  .introSide-right { grid-area: right; }
   .welcomeCopy { max-width: 92%; }
-  .welcomeCopy h2 { font-size: 40px; }
-  .framedPortrait { width: min(100%, 520px); margin-left: auto; }
-  .countdown { grid-template-columns: repeat(4, 1fr); width: 100%; }
-  .countdown > div { padding: 0 5px; }
-  .countdown strong { font-size: clamp(36px,11vw,50px); }
-  .countdown span { font-size: 6px; letter-spacing: .1em; }
   .editorialSection { grid-template-columns: 1fr; gap: 48px; }
   .editorialImage.tall { width: 92%; max-height: none; }
   .editorialCopy { margin-left: 14%; }
@@ -831,8 +993,9 @@ a { color: inherit; }
   .venueCopy { position: static; padding-top: 0; }
   .photoMosaic { margin-inline: -22px; gap: 7px; }
   .mosaicWide { aspect-ratio: 1.25; }
-  .photoBreak { height: 80svh; min-height: 580px; }
-  .photoBreak img { object-position: 54% center; }
+  .contactSection { grid-template-columns: 1fr; height: auto; }
+  .contactCopy { padding: 56px 28px 40px; }
+  .contactPhoto { min-height: 52svh; }
   .choiceGrid.two { grid-template-columns: 1fr; }
   .fieldRow { grid-template-columns: 1fr; }
   .loginScreen { padding: 24px 14px; }
@@ -857,7 +1020,7 @@ a { color: inherit; }
   .loginForm { width: min(100%, 180px); }
   .loginForm input {
     padding: 4px 2px 6px;
-    font-size: 15px;
+    font-size: 16px;
   }
   .loginForm button {
     margin-top: 6px;
@@ -869,17 +1032,21 @@ a { color: inherit; }
   }
   .envelopeScreen { padding: 24px 18px 20px; }
   .envelopeButton { width: min(84vw, 400px); }
-  .staySection { padding: 72px 18px; }
-  .stayCard {
-    width: min(88vw, 480px);
-    padding: 48px 26px 42px;
+  .infoSection { grid-template-columns: 1fr; }
+  .infoArt { min-height: 52svh; }
+  .infoCopy { padding: 64px 28px 80px; }
+  .staySection {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 80px 28px 88px;
+    gap: 48px;
   }
-  .stayCard h2 {
-    font-size: clamp(34px, 10.5vw, 52px);
-  }
+  .stayCopy { text-align: center; }
+  .stayIcon { width: min(46%, 180px); }
 }
 
 @media (max-width: 480px) {
+  .videoHero { min-height: 360px; }
   .envelopeButton { width: min(88vw, 360px); }
   .envelopeHeading { margin-bottom: 8px; padding-inline: 8px; }
   .envelopeHeading h1 {
@@ -894,13 +1061,11 @@ a { color: inherit; }
   .siteNav { gap: 10px; flex-wrap: wrap; justify-content: center; }
   .heroLocation { font-size: 9px; }
   .heroDate { font-size: 16px; }
-  .sectionTitleRow { margin-bottom: 48px; }
-  .eventsBoard-4,
-  .eventsBoard-5 { grid-template-columns: 1fr; }
-  .eventColumn { border-right: 0; padding-bottom: 36px; }
-  .eventColumn:nth-child(odd) { border-right: 0; }
+  .scheduleTitle { margin-bottom: 48px; }
+  .weekendBoard-3,
+  .weekendBoard-2 { grid-template-columns: 1fr; }
+  .weekendEvents { gap: 16px; }
   .formIntro { margin-bottom: 42px; }
-  .stayCard h2 { transform: translateX(0.08em); }
 }
 
 @media (prefers-reduced-motion: reduce) {
