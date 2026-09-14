@@ -153,8 +153,8 @@ function Envelope({ guest, opening, onOpen }: { guest: PublicGuest; opening: boo
           </div>
           <div className="envelopeLayer envelopeCard">
             <Image
-              src="/images/SC%20Lace%20Doily.png"
-              alt="Sebastian Suherman and Charlize Sentosa"
+              src="/images/2-save-the-date-doily.png"
+              alt="Save the Date"
               fill
               sizes="(max-width: 800px) 90vw, 440px"
               priority
@@ -275,7 +275,7 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
       id: "saturday",
       date: "Saturday, August 14th",
       title: "The Wedding Day",
-      icon: null,
+      icon: "/images/wedding-icon.png",
       dressCode: saturday.find((event) => event.dressCode)?.dressCode,
       events: saturday,
     },
@@ -299,7 +299,7 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
         {days.map((day) => (
           <article className={`weekendDay weekendDay-${day.id}`} key={day.id}>
             {day.icon ? (
-              <div className="weekendIcon">
+              <div className={`weekendIcon${day.id === "saturday" ? " weekendIcon-mobileOnly" : ""}`}>
                 <Image src={day.icon} alt="" width={280} height={280} />
               </div>
             ) : null}

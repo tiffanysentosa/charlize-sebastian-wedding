@@ -320,11 +320,6 @@ a { color: inherit; }
   transform: translateY(2%);
   transition: transform 1.55s cubic-bezier(.18, .72, .17, 1);
 }
-.envelopeCard img {
-  object-fit: contain;
-  object-position: center 38%;
-  padding: 7% 8% 16%;
-}
 .envelopeFront { z-index: 3; }
 .openLabel {
   display: block;
@@ -440,7 +435,6 @@ a { color: inherit; }
   width: min(88vw, calc(100svh - 220px), 820px);
   aspect-ratio: 1;
   height: auto;
-  filter: drop-shadow(0 18px 40px rgba(18, 16, 14, .28));
 }
 .saveDateDoily img {
   display: block;
@@ -605,6 +599,7 @@ a { color: inherit; }
   max-width: 140px;
   object-fit: contain;
 }
+.weekendIcon-mobileOnly { display: none; }
 .weekendDay h3 {
   margin: 0;
   font-family: var(--font-display);
@@ -937,6 +932,7 @@ a { color: inherit; }
 @media (max-width: 1100px) {
   .weekendBoard-3,
   .weekendBoard-2 { grid-template-columns: 1fr; gap: 56px; }
+  .weekendIcon-mobileOnly { display: grid; }
 }
 
 @media (min-width: 801px) {
