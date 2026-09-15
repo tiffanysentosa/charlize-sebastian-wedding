@@ -455,24 +455,6 @@ a { color: inherit; }
   align-items: center;
   background: #f7f3ec;
 }
-.introTrio {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 12px 28px;
-  width: min(100%, 1080px);
-}
-.introSide {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(13px, 1.35vw, 16px);
-  font-weight: 400;
-  letter-spacing: .2em;
-  line-height: 1.7;
-  text-transform: uppercase;
-  text-align: center;
-  color: #2c2a27;
-}
 .introPortrait {
   width: min(42vw, 420px);
 }
@@ -483,7 +465,7 @@ a { color: inherit; }
 }
 .welcomeCopy {
   max-width: 620px;
-  margin: 8px auto 0;
+  margin: 36px auto 0;
   text-align: center;
 }
 .detailsBody {
@@ -702,6 +684,11 @@ a { color: inherit; }
   line-height: 1.75;
   color: #3d3a36;
 }
+.infoBlock a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .infoBlock p + p { margin-top: 16px; }
 .infoRule {
   width: 72px;
@@ -838,20 +825,43 @@ a { color: inherit; }
   color: #f4efe6;
 }
 .contactNote {
-  margin: 0 0 32px;
-  max-width: 280px;
+  margin: 0 0 28px;
+  max-width: 320px;
   font-family: var(--font-serif);
   font-size: 16px;
   line-height: 1.7;
   color: #f4efe6;
 }
+.contactEmail {
+  margin: 0 0 32px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.contactEmail a,
+.contactPeople a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .contactPeople {
   display: grid;
-  gap: 10px;
+  gap: 22px;
   margin-bottom: 28px;
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
+}
+.contactPerson {
+  display: grid;
+  gap: 4px;
+}
+.contactName {
+  margin: 0;
+  font-size: 18px;
+}
+.contactPerson p {
+  margin: 0;
 }
 .contactLogo {
   width: 88px;
@@ -960,26 +970,11 @@ a { color: inherit; }
   .saveDateDoily {
     width: min(84vw, calc(100svh - 210px), 640px);
   }
-  .introSide {
-    font-size: 12px;
-    letter-spacing: .12em;
-  }
+  .introPortrait { width: min(86vw, 420px); }
+  .welcomeCopy { max-width: 92%; }
   .scheduleTitle { margin-bottom: 56px; }
   .scheduleTitle h2 { font-size: clamp(36px, 11vw, 52px); letter-spacing: .08em; }
   .formIntro h2 { font-size: clamp(42px, 14vw, 64px); letter-spacing: .1em; }
-  .welcomeSection { min-height: auto; }
-  .introTrio {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "photo photo"
-      "left right";
-    justify-items: center;
-    gap: 18px 12px;
-  }
-  .introPortrait { grid-area: photo; width: min(86vw, 420px); }
-  .introSide-left { grid-area: left; }
-  .introSide-right { grid-area: right; }
-  .welcomeCopy { max-width: 92%; }
   .editorialSection { grid-template-columns: 1fr; gap: 48px; }
   .editorialImage.tall { width: 92%; max-height: none; }
   .editorialCopy { margin-left: 14%; }

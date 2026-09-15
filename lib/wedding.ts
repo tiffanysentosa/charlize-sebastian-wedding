@@ -35,6 +35,7 @@ type WeddingConfig = {
     hotels: Record<HotelType, {
       name: string;
       shortName: string;
+      brunchVenue: string;
     }>;
   };
   schedules: Record<ScheduleType, WeddingSchedule>;
@@ -49,7 +50,7 @@ export const wedding: WeddingConfig = {
   year: 2027,
   location: "Nusa Dua, Bali",
   venue: "The St. Regis Bali Resort",
-  ceremonyIso: "2027-08-14T16:00:00+08:00",
+  ceremonyIso: "2027-08-14T15:30:00+08:00",
   accommodations: {
     location: "Nusa Dua, Bali",
     weddingVenue: "The St. Regis Bali Resort",
@@ -61,10 +62,12 @@ export const wedding: WeddingConfig = {
       renaissance: {
         name: "Renaissance Bali Resort & Spa Nusa Dua",
         shortName: "Renaissance Bali",
+        brunchVenue: "Clay Craft Restaurant",
       },
       "st-regis": {
         name: "The St. Regis Bali Resort Nusa Dua",
         shortName: "St. Regis Bali",
+        brunchVenue: "Boneka",
       },
     },
   },
@@ -76,10 +79,10 @@ export const wedding: WeddingConfig = {
         {
           id: "ceremony",
           dateLabel: "Saturday, August 14",
-          time: "4:00 PM",
+          time: "3:30 PM",
           title: "Holy Matrimony",
           venue: "St. Regis Beach",
-          dressCode: "Black Tie",
+          dressCode: "Beach Formal",
         },
         {
           id: "cocktails",
@@ -91,23 +94,23 @@ export const wedding: WeddingConfig = {
         {
           id: "dinner",
           dateLabel: "Saturday, August 14",
-          time: "7:00 PM",
+          time: "6:30 PM",
           title: "Dinner",
           venue: "St. Regis Cloud Nine",
         },
         {
           id: "afterparty",
           dateLabel: "Saturday, August 14",
-          time: "9:30 PM",
+          time: "10:00 PM",
           title: "After Party",
           venue: "St. Regis Astor Ballroom",
         },
         {
           id: "brunch",
           dateLabel: "Sunday, August 15",
-          time: "11:00 AM",
+          time: "10:00 AM",
           title: "D+1 Brunch",
-          venue: "Renaissance Breakfast",
+          venue: "Brunch",
           dressCode: "Casual",
           icon: "/images/icon2.png",
         },
@@ -120,18 +123,19 @@ export const wedding: WeddingConfig = {
         {
           id: "welcome",
           dateLabel: "Friday, August 13",
+          time: "6:00 PM",
           title: "Welcome Dinner",
           venue: "Renaissance Nusa Dua",
-          dressCode: "Cocktail Attire",
+          dressCode: "Casual, White Party",
           icon: "/images/icon1.png",
         },
         {
           id: "ceremony",
           dateLabel: "Saturday, August 14",
-          time: "4:00 PM",
+          time: "3:30 PM",
           title: "Holy Matrimony",
           venue: "St. Regis Beach",
-          dressCode: "Black Tie",
+          dressCode: "Beach Formal",
         },
         {
           id: "cocktails",
@@ -143,23 +147,23 @@ export const wedding: WeddingConfig = {
         {
           id: "dinner",
           dateLabel: "Saturday, August 14",
-          time: "7:00 PM",
+          time: "6:30 PM",
           title: "Dinner",
           venue: "St. Regis Cloud Nine",
         },
         {
           id: "afterparty",
           dateLabel: "Saturday, August 14",
-          time: "9:30 PM",
+          time: "10:00 PM",
           title: "After Party",
           venue: "St. Regis Astor Ballroom",
         },
         {
           id: "brunch",
           dateLabel: "Sunday, August 15",
-          time: "11:00 AM",
+          time: "10:00 AM",
           title: "D+1 Brunch",
-          venue: "Renaissance Breakfast",
+          venue: "Brunch",
           dressCode: "Casual",
           icon: "/images/icon2.png",
         },

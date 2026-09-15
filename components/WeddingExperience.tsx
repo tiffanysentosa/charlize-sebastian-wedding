@@ -209,14 +209,18 @@ function TravelDetails() {
         <article className="infoBlock">
           <h3>Airfare</h3>
           <p>
-            Guests are kindly asked to book their own flights. We recommend arriving in Bali no later than August 12th to allow time for rest and sightseeing before the wedding.
+            Guests are kindly asked to book their own flights. We recognize this is a long way to travel and we don’t take it lightly. Please don’t hesitate to reach out if you have questions, need help with logistics, or hit a snag along the way.
           </p>
         </article>
         <hr className="infoRule" />
         <article className="infoBlock">
           <h3>International travel</h3>
           <p>
-            Foreign travelers can apply for a visa on arrival through the official immigration site of Indonesia for a visa that will be valid for 30 days.
+            Foreign travelers can apply for a visa on arrival through the{" "}
+            <a href="https://evisa.imigrasi.go.id/" target="_blank" rel="noopener noreferrer">
+              official immigration site
+            </a>{" "}
+            of Indonesia for a visa that will be valid for 30 days.
           </p>
           <p>
             International travelers can also get an e-sim on arrival at one of the phone kiosks at the Bali Airport.
@@ -230,7 +234,7 @@ function TravelDetails() {
 function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelType: HotelType }) {
   const hotel = wedding.accommodations.hotels[hotelType];
   const nights = wedding.accommodations.nights[scheduleType];
-  const sameResort = hotelType === "st-regis";
+  const atRenaissance = hotelType === "renaissance";
 
   return (
     <section id="stay" className="staySection">
@@ -245,31 +249,32 @@ function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelTy
         <p className="stayHotel">{hotel.name}</p>
         <p className="stayDates">{nights}</p>
         <p className="stayDetail">
-          We’ve reserved you a room at {hotel.name} for {nights.replace(", 2027", "")}. Please let us know on your RSVP if you want to stay with us.
+          We’ve reserved you a room at {hotel.name} for {nights.replace(", 2027", "")}. Please let us know on your RSVP if you would like to stay with us.
         </p>
-        <p className="stayNote">
-          {sameResort
-            ? "The wedding itself is at The St. Regis, so you’ll already be at the celebration."
-            : "The wedding itself is at The St. Regis, and transportation will be provided on the wedding day."}
-        </p>
+        {atRenaissance ? (
+          <p className="stayNote">
+            The wedding itself is at The St. Regis, and transportation will be provided to and from the venue on the wedding day. The estimated travel time between Renaissance &amp; St. Regis is 5 minutes.
+          </p>
+        ) : null}
       </div>
     </section>
   );
 }
 
-function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
+function Schedule({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelType: HotelType }) {
   const schedule = wedding.schedules[scheduleType];
+  const brunchVenue = wedding.accommodations.hotels[hotelType].brunchVenue;
   const friday = schedule.events.find((event) => event.id === "welcome");
   const saturday = schedule.events.filter((event) => event.dateLabel.startsWith("Saturday"));
   const sunday = schedule.events.find((event) => event.id === "brunch");
   const days = [
     friday ? {
       id: "friday",
-      date: "Friday, August 13th",
-      title: "Welcome Dinner",
+      date: friday.time ? `Friday, August 13th · ${friday.time}` : "Friday, August 13th",
+      title: "The Welcome Dinner",
       icon: friday.icon,
       dressCode: friday.dressCode,
-      events: [friday],
+      events: [{ ...friday, time: undefined }],
     } : null,
     {
       id: "saturday",
@@ -282,10 +287,13 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
     sunday ? {
       id: "sunday",
       date: "Sunday, August 15th",
-      title: "Farewell Brunch",
+      title: "The Farewell Brunch",
       icon: sunday.icon,
       dressCode: sunday.dressCode,
-      events: [sunday],
+      events: [{
+        ...sunday,
+        venue: `Please meet at ${brunchVenue}`,
+      }],
     } : null,
   ].filter((day) => day !== null);
 
@@ -451,11 +459,11 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
             <fieldset>
               <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
               <p className="fieldHint">
-                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name} if you’d like to stay with us. Would you like one or two nights (August 13–15)?
+                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name}. Please let us know your preference.
               </p>
               <div className="choiceGrid compact">
                 <label><input type="radio" name="accommodation" value="two-nights" required />Two nights (August 13–15)</label>
-                <label><input type="radio" name="accommodation" value="one-night" required />One night</label>
+                <label><input type="radio" name="accommodation" value="one-night" required />One night (August 14–15)</label>
                 <label><input type="radio" name="accommodation" value="no" required />No, I’ll arrange my own stay</label>
               </div>
             </fieldset>
@@ -463,10 +471,10 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
             <fieldset>
               <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
               <p className="fieldHint">
-                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name} for the night of August 14. Would you like to stay with us?
+                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name}. Please let us know your preference.
               </p>
               <div className="choiceGrid two compact">
-                <label><input type="radio" name="accommodation" value="yes" required />Yes, please</label>
+                <label><input type="radio" name="accommodation" value="yes" required />Yes, please (August 14–15)</label>
                 <label><input type="radio" name="accommodation" value="no" required />No, thank you</label>
               </div>
             </fieldset>
@@ -506,8 +514,8 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
       ) : null}
 
       <label className="fieldLabel">
-        A note for the couple <span className="optional">optional</span>
-        <textarea name="message" rows={4} placeholder="Leave a message…" />
+        Additional Notes / Requests / Questions <span className="optional">optional</span>
+        <textarea name="message" rows={4} placeholder="Leave a note…" />
       </label>
 
       {status === "error" ? <p className="formError" role="alert">{message}</p> : null}
@@ -554,29 +562,25 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
       </section>
 
       <section id="details" className="welcomeSection sectionPad">
-        <div className="introTrio">
-          <p className="introSide introSide-left">Our love<br />for the sea</p>
-          <div className="introPortrait">
-            <Image
-              src="/images/Couple Photo 1.png"
-              alt="Sebastian and Charlize sitting together"
-              width={1254}
-              height={1254}
-              sizes="(max-width: 800px) 86vw, 420px"
-            />
-          </div>
-          <p className="introSide introSide-right">(and each<br />other)</p>
+        <div className="introPortrait">
+          <Image
+            src="/images/Couple Photo 1.png"
+            alt="Sebastian and Charlize sitting together"
+            width={1254}
+            height={1254}
+            sizes="(max-width: 800px) 86vw, 420px"
+          />
         </div>
         <div className="welcomeCopy">
           <p className="detailsBody">
-            We can’t wait to celebrate with you in Bali. Join us for a weekend by the sea at The St. Regis Bali Resort in Nusa Dua. Ceremony on the beach, followed by cocktails, dinner and dancing.
+            Life’s greatest joys are made richer by the people we hold dear. On August 14th, 2027 we’ll marry in Bali, surrounded by the people and the culture that shaped us. We would be honored to have you there — and fully expect you to eat too much, dance too long, and cry a little.
           </p>
           <p className="detailsLove">with love,</p>
           <p className="detailsSignoff">Sebastian and Charlize</p>
         </div>
       </section>
 
-      <Schedule scheduleType={guest.scheduleType} />
+      <Schedule scheduleType={guest.scheduleType} hotelType={guest.hotelType} />
       <TravelDetails />
       <Stay scheduleType={guest.scheduleType} hotelType={guest.hotelType} />
 
@@ -591,11 +595,31 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
             <h2>Bali</h2>
           </div>
           <p className="contactNote">
-            Please don’t hesitate to contact us below if you have any questions or concerns.
+            Please don’t hesitate to contact us below if you have any questions or concerns. WhatsApp is best — please text rather than call.
+          </p>
+          <p className="contactEmail">
+            Email:{" "}
+            <a href="mailto:sebastiancharlize1@gmail.com">sebastiancharlize1@gmail.com</a>
           </p>
           <div className="contactPeople">
-            <p>Sebastian Suherman</p>
-            <p>Charlize Sentosa</p>
+            <div className="contactPerson">
+              <p className="contactName">Sebastian Suherman</p>
+              <p>
+                WhatsApp:{" "}
+                <a href="https://wa.me/628111184845" target="_blank" rel="noopener noreferrer">
+                  +62 811-1184-845
+                </a>
+              </p>
+            </div>
+            <div className="contactPerson">
+              <p className="contactName">Charlize Sentosa</p>
+              <p>
+                WhatsApp:{" "}
+                <a href="https://wa.me/14012594744" target="_blank" rel="noopener noreferrer">
+                  +1 401-259-4744
+                </a>
+              </p>
+            </div>
           </div>
           <div className="contactLogo">
             <Image
