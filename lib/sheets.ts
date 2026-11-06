@@ -8,20 +8,23 @@ export type RsvpRecord = {
   guestId: string;
   guestName: string;
   scheduleType: string;
+  hotelType: string;
+  invitationType: string;
+  invited: number;
   attending: string;
   invitationName: string;
   email: string;
   whatsapp: string;
-  plusOne: string;
-  plusOneName: string;
-  welcomeDinner: string;
-  weddingDay: string;
-  brunch: string;
+  guestCount: number;
+  guestNames: string;
+  welcomeDinnerCount: number;
+  welcomeDinnerNames: string;
+  weddingCount: number;
+  weddingNames: string;
   accommodation: string;
-  partySize: string;
+  stayingCount: number;
   dietaryRestrictions: string;
   message: string;
-  hotelType: string;
 };
 
 const headers = [
@@ -29,20 +32,23 @@ const headers = [
   "Guest ID",
   "Guest Name",
   "Schedule Type",
+  "Hotel",
+  "Invitation Type",
+  "Invited",
   "Attending",
   "Invitation Name",
   "Email",
   "WhatsApp",
-  "Plus One",
-  "Plus One Name",
-  "Welcome Dinner",
-  "Wedding Day",
-  "Brunch",
+  "Guests Coming",
+  "Guest Names",
+  "Welcome Dinner #",
+  "Welcome Dinner Names",
+  "Wedding #",
+  "Wedding Names",
   "Accommodation",
-  "Party Size",
+  "# Staying",
   "Dietary Restrictions",
   "Message",
-  "Hotel",
 ];
 
 function normalizePrivateKey(raw: string) {
@@ -149,17 +155,18 @@ async function sheetsRequest(url: string, token: string, init?: RequestInit) {
   return response;
 }
 
-async function appendToGoogleSheet(record: RsvpRecord) {
+async function saveToGoogleSheet(record: RsvpRecord) {
   const token = await getGoogleAccessToken();
   const spreadsheetId = process.env.GOOGLE_SHEET_ID!;
   const sheetName = process.env.GOOGLE_SHEET_NAME || "RSVPs";
   const base = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values`;
-  const headerRange = `${sheetName}!A1:R1`;
+  const lastColumn = "U";
+  const headerRange = `${sheetName}!A1:${lastColumn}1`;
 
   const headerResponse = await sheetsRequest(`${base}/${encodeURIComponent(headerRange)}`, token);
   const headerData = (await headerResponse.json()) as { values?: unknown[][] };
 
-  if (!headerData.values?.length) {
+  if (headerData.values?.[0]?.join("|") !== headers.join("|")) {
     await sheetsRequest(`${base}/${encodeURIComponent(headerRange)}?valueInputOption=RAW`, token, {
       method: "PUT",
       body: JSON.stringify({ values: [headers] }),
@@ -171,24 +178,43 @@ async function appendToGoogleSheet(record: RsvpRecord) {
     record.guestId,
     record.guestName,
     record.scheduleType,
+    record.hotelType,
+    record.invitationType,
+    record.invited,
     record.attending,
     record.invitationName,
     record.email,
     record.whatsapp,
-    record.plusOne,
-    record.plusOneName,
-    record.welcomeDinner,
-    record.weddingDay,
-    record.brunch,
+    record.guestCount,
+    record.guestNames,
+    record.welcomeDinnerCount,
+    record.welcomeDinnerNames,
+    record.weddingCount,
+    record.weddingNames,
     record.accommodation,
-    record.partySize,
+    record.stayingCount,
     record.dietaryRestrictions,
     record.message,
-    record.hotelType,
   ];
 
-  const appendRange = `${sheetName}!A:R`;
-  const appendUrl = `${base}/${encodeURIComponent(appendRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  // Each invitation keeps one row, so an updated RSVP replaces the earlier answer.
+  const idResponse = await sheetsRequest(`${base}/${encodeURIComponent(`${sheetName}!B:B`)}`, token);
+  const idData = (await idResponse.json()) as { values?: unknown[][] };
+  const existingIndex = (idData.values ?? []).findIndex((cells, index) => index > 0 && cells[0] === record.guestId);
+
+  // RAW keeps WhatsApp numbers' leading "+" and stores guest text exactly as typed.
+  if (existingIndex > 0) {
+    const rowNumber = existingIndex + 1;
+    const rowRange = `${sheetName}!A${rowNumber}:${lastColumn}${rowNumber}`;
+    await sheetsRequest(`${base}/${encodeURIComponent(rowRange)}?valueInputOption=RAW`, token, {
+      method: "PUT",
+      body: JSON.stringify({ values: [row] }),
+    });
+    return;
+  }
+
+  const appendRange = `${sheetName}!A:${lastColumn}`;
+  const appendUrl = `${base}/${encodeURIComponent(appendRange)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
   await sheetsRequest(appendUrl, token, {
     method: "POST",
     body: JSON.stringify({ values: [row] }),
@@ -203,6 +229,7 @@ async function appendLocally(record: RsvpRecord) {
   } catch {
     // First local RSVP.
   }
+  current = current.filter((saved) => saved.guestId !== record.guestId);
   current.push(record);
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(current, null, 2));
@@ -210,7 +237,7 @@ async function appendLocally(record: RsvpRecord) {
 
 export async function saveRsvp(record: RsvpRecord) {
   if (googleConfigured()) {
-    await appendToGoogleSheet(record);
+    await saveToGoogleSheet(record);
     return { destination: "google-sheet" as const };
   }
 

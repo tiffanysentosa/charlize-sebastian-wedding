@@ -10,7 +10,10 @@ type PublicGuest = {
   scheduleType: ScheduleType;
   hotelType: HotelType;
   plusOneAllowed: boolean;
+  familySize: number | null;
 };
+
+type FamilyMember = { name: string; dinner: boolean; wedding: boolean };
 
 const MUSIC_SRC = "/audio/le-cygne.mp3";
 
@@ -209,7 +212,7 @@ function TravelDetails() {
         <article className="infoBlock">
           <h3>Airfare</h3>
           <p>
-            Guests are kindly asked to book their own flights. We recognize this is a long way to travel and we don’t take it lightly. Please don’t hesitate to reach out if you have questions, need help with logistics, or hit a snag along the way.
+            Guests are kindly asked to book their own flights to Ngurah Rai International Airport. We recognize this is a long way to travel and we don’t take it lightly. Please don’t hesitate to reach out if you have questions, need help with logistics, or hit a snag along the way.
           </p>
         </article>
         <hr className="infoRule" />
@@ -231,7 +234,11 @@ function TravelDetails() {
   );
 }
 
-function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelType: HotelType }) {
+function Stay({ scheduleType, hotelType, familySize }: {
+  scheduleType: ScheduleType;
+  hotelType: HotelType;
+  familySize: number | null;
+}) {
   const hotel = wedding.accommodations.hotels[hotelType];
   const nights = wedding.accommodations.nights[scheduleType];
   const atRenaissance = hotelType === "renaissance";
@@ -249,7 +256,7 @@ function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelTy
         <p className="stayHotel">{hotel.name}</p>
         <p className="stayDates">{nights}</p>
         <p className="stayDetail">
-          We’ve reserved you a room at {hotel.name} for {nights.replace(", 2027", "")}. Please let us know on your RSVP if you would like to stay with us.
+          We’ve reserved {familySize !== null ? "you and your family rooms" : "you a room"} at {atRenaissance ? "the " : ""}{hotel.name} for {nights.replace(", 2027", "")}, with breakfast included. Please let us know on your RSVP if you would like to stay with us.
         </p>
         {atRenaissance ? (
           <p className="stayNote">
@@ -261,12 +268,10 @@ function Stay({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelTy
   );
 }
 
-function Schedule({ scheduleType, hotelType }: { scheduleType: ScheduleType; hotelType: HotelType }) {
+function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
   const schedule = wedding.schedules[scheduleType];
-  const brunchVenue = wedding.accommodations.hotels[hotelType].brunchVenue;
   const friday = schedule.events.find((event) => event.id === "welcome");
   const saturday = schedule.events.filter((event) => event.dateLabel.startsWith("Saturday"));
-  const sunday = schedule.events.find((event) => event.id === "brunch");
   const days = [
     friday ? {
       id: "friday",
@@ -284,17 +289,6 @@ function Schedule({ scheduleType, hotelType }: { scheduleType: ScheduleType; hot
       dressCode: saturday.find((event) => event.dressCode)?.dressCode,
       events: saturday,
     },
-    sunday ? {
-      id: "sunday",
-      date: "Sunday, August 15th",
-      title: "The Farewell Brunch",
-      icon: sunday.icon,
-      dressCode: sunday.dressCode,
-      events: [{
-        ...sunday,
-        venue: `Please meet at ${brunchVenue}`,
-      }],
-    } : null,
   ].filter((day) => day !== null);
 
   return (
@@ -307,7 +301,7 @@ function Schedule({ scheduleType, hotelType }: { scheduleType: ScheduleType; hot
         {days.map((day) => (
           <article className={`weekendDay weekendDay-${day.id}`} key={day.id}>
             {day.icon ? (
-              <div className={`weekendIcon${day.id === "saturday" ? " weekendIcon-mobileOnly" : ""}`}>
+              <div className="weekendIcon">
                 <Image src={day.icon} alt="" width={280} height={280} />
               </div>
             ) : null}
@@ -336,15 +330,41 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
   const [plusOne, setPlusOne] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [familyCount, setFamilyCount] = useState(0);
+  const [family, setFamily] = useState<FamilyMember[]>(() =>
+    Array.from({ length: guest.familySize ?? 0 }, (_, index) => ({
+      name: index === 0 ? guest.name : "",
+      dinner: true,
+      wedding: true,
+    })),
+  );
+  const [accommodation, setAccommodation] = useState("");
+  const [staying, setStaying] = useState(0);
   const hasPlusOne = guest.plusOneAllowed;
-  const partySize = hasPlusOne && plusOne === "yes" ? "2" : "1";
+  const isFamily = guest.familySize !== null;
+  const isExtended = guest.scheduleType === "extended";
+  const joiningFamily = family.slice(0, familyCount);
+  const stayingCount = staying === 0 ? familyCount : Math.min(staying, familyCount);
+  const wantsRoom = accommodation !== "" && accommodation !== "no";
+  const stayHotel = wedding.accommodations.hotels[guest.hotelType];
+  const stayOffer = isFamily ? "rooms for you and your family" : "a room for you";
+  const hotelPrefix = guest.hotelType === "renaissance" ? "the " : "";
+
+  function updateFamilyMember(index: number, changes: Partial<FamilyMember>) {
+    setFamily((current) => current.map((member, i) => (i === index ? { ...member, ...changes } : member)));
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (attending === "yes" && isExtended && joiningFamily.some((member) => !member.dinner && !member.wedding)) {
+      setStatus("error");
+      setMessage("Please choose at least one event for each guest.");
+      return;
+    }
     setStatus("saving");
     setMessage("");
     const data = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(data.entries());
+    const payload = { ...Object.fromEntries(data.entries()), familyMembers: joiningFamily };
     try {
       const response = await fetch("/api/rsvp", {
         method: "POST",
@@ -377,152 +397,239 @@ function RsvpForm({ guest }: { guest: PublicGuest }) {
     }
   }
 
-  if (status === "success") {
-    return (
-      <div className="rsvpSuccess" role="status">
-        <div className="successMonogram">S <span>&amp;</span> C</div>
-        <h3>Thank you, {guest.name}.</h3>
-        <p>{message}</p>
-        <button type="button" className="textButton" onClick={() => setStatus("idle")}>Update response</button>
-      </div>
-    );
-  }
-
   return (
-    <form className="rsvpForm" onSubmit={submit}>
-      <div className="formIntro">
-        <h2>RSVP</h2>
-        <p className="formLead">Make our day special</p>
-        <p>We would be delighted to celebrate with you, {guest.name}.</p>
-      </div>
-
-      <fieldset>
-        <legend>Will you be joining us?</legend>
-        <div className="choiceGrid two">
-          <label className={attending === "yes" ? "selected" : ""}>
-            <input required type="radio" name="attending" value="yes" onChange={() => setAttending("yes")} />
-            Joyfully accepts
-          </label>
-          <label className={attending === "no" ? "selected" : ""}>
-            <input required type="radio" name="attending" value="no" onChange={() => { setAttending("no"); setPlusOne(""); }} />
-            Regretfully declines
-          </label>
-        </div>
-      </fieldset>
-
-      {attending === "yes" ? (
-        <div className="rsvpDetails">
-          <label className="fieldLabel">
-            Who should we address the invitations to?
-            <input name="invitationName" required defaultValue={guest.name} autoComplete="name" />
-          </label>
-
-          <div className="fieldRow">
-            <label className="fieldLabel">
-              Email
-              <input type="email" name="email" required autoComplete="email" />
-            </label>
-            <label className="fieldLabel">
-              WhatsApp
-              <input type="tel" name="whatsapp" required autoComplete="tel" placeholder="+62 …" />
-            </label>
-          </div>
-
-          {hasPlusOne ? (
-            <>
-              <fieldset>
-                <legend>Will you be bringing a plus one?</legend>
-                <div className="choiceGrid two compact">
-                  <label>
-                    <input required type="radio" name="plusOne" value="yes" onChange={() => setPlusOne("yes")} />
-                    Yes
-                  </label>
-                  <label>
-                    <input required type="radio" name="plusOne" value="no" onChange={() => setPlusOne("no")} />
-                    No
-                  </label>
-                </div>
-              </fieldset>
-              {plusOne === "yes" ? (
-                <label className="fieldLabel">
-                  Name of your plus one
-                  <input name="plusOneName" required autoComplete="name" placeholder="Full name" />
-                </label>
-              ) : null}
-            </>
-          ) : (
-            <input type="hidden" name="plusOne" value="not-allotted" />
-          )}
-          <input type="hidden" name="partySize" value={partySize} />
-
-          {guest.scheduleType === "extended" ? (
-            <fieldset>
-              <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
-              <p className="fieldHint">
-                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name}. Please let us know your preference.
-              </p>
-              <div className="choiceGrid compact">
-                <label><input type="radio" name="accommodation" value="two-nights" required />Two nights (August 13–15)</label>
-                <label><input type="radio" name="accommodation" value="one-night" required />One night (August 14–15)</label>
-                <label><input type="radio" name="accommodation" value="no" required />No, I’ll arrange my own stay</label>
-              </div>
-            </fieldset>
-          ) : (
-            <fieldset>
-              <legend>Stay at {wedding.accommodations.hotels[guest.hotelType].shortName}</legend>
-              <p className="fieldHint">
-                We’d be happy to provide a room for you at {wedding.accommodations.hotels[guest.hotelType].name}. Please let us know your preference.
-              </p>
-              <div className="choiceGrid two compact">
-                <label><input type="radio" name="accommodation" value="yes" required />Yes, please (August 14–15)</label>
-                <label><input type="radio" name="accommodation" value="no" required />No, thank you</label>
-              </div>
-            </fieldset>
-          )}
-
-          {guest.scheduleType === "extended" ? (
-            <fieldset>
-              <legend>Welcome dinner · Friday</legend>
-              <div className="choiceGrid two compact">
-                <label><input type="radio" name="welcomeDinner" value="yes" required />Attending</label>
-                <label><input type="radio" name="welcomeDinner" value="no" required />Unable to attend</label>
-              </div>
-            </fieldset>
-          ) : null}
-
-          <fieldset>
-            <legend>Wedding day · Saturday</legend>
-            <div className="choiceGrid two compact">
-              <label><input type="radio" name="weddingDay" value="yes" required />Attending</label>
-              <label><input type="radio" name="weddingDay" value="no" required />Unable to attend</label>
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend>Brunch · Sunday</legend>
-            <div className="choiceGrid two compact">
-              <label><input type="radio" name="brunch" value="yes" required />Attending</label>
-              <label><input type="radio" name="brunch" value="no" required />Unable to attend</label>
-            </div>
-          </fieldset>
-
-          <label className="fieldLabel">
-            Dietary restrictions
-            <textarea name="dietaryRestrictions" rows={3} placeholder="Please let us know of any allergies or dietary needs." />
-          </label>
+    <>
+      {status === "success" ? (
+        <div className="rsvpSuccess" role="status">
+          <div className="successMonogram">S <span>&amp;</span> C</div>
+          <h3>Thank you, {guest.name}.</h3>
+          <p>{message}</p>
+          <button type="button" className="textButton" onClick={() => setStatus("idle")}>Update response</button>
         </div>
       ) : null}
+      {/* Stays mounted while hidden so "Update response" keeps the guest's answers. */}
+      <form className="rsvpForm" onSubmit={submit} hidden={status === "success"}>
+        <div className="formIntro">
+          <h2>RSVP</h2>
+          <p className="formLead">Make our day special</p>
+          <p>We would be delighted to celebrate with you, {guest.name}.</p>
+        </div>
 
-      <label className="fieldLabel">
-        Additional Notes / Requests / Questions <span className="optional">optional</span>
-        <textarea name="message" rows={4} placeholder="Leave a note…" />
-      </label>
+        <fieldset>
+          <legend>Will you be joining us?</legend>
+          <div className="choiceGrid two">
+            <label className={attending === "yes" ? "selected" : ""}>
+              <input required type="radio" name="attending" value="yes" onChange={() => setAttending("yes")} />
+              Joyfully accepts
+            </label>
+            <label className={attending === "no" ? "selected" : ""}>
+              <input required type="radio" name="attending" value="no" onChange={() => { setAttending("no"); setPlusOne(""); }} />
+              Regretfully declines
+            </label>
+          </div>
+        </fieldset>
 
-      {status === "error" ? <p className="formError" role="alert">{message}</p> : null}
-      <button className="submitRsvp" type="submit" disabled={status === "saving" || !attending}>
-        {status === "saving" ? "Sending…" : "Send RSVP"}
-      </button>
-    </form>
+        {attending === "yes" ? (
+          <div className="rsvpDetails">
+            <label className="fieldLabel">
+              Who should we address the invitations to?
+              <input name="invitationName" required defaultValue={guest.name} autoComplete="name" />
+            </label>
+
+            <div className="fieldRow">
+              <label className="fieldLabel">
+                Email
+                <input type="email" name="email" required autoComplete="email" />
+              </label>
+              <label className="fieldLabel">
+                WhatsApp
+                <input type="tel" name="whatsapp" required autoComplete="tel" placeholder="+62 …" />
+              </label>
+            </div>
+
+            {hasPlusOne ? (
+              <>
+                <fieldset>
+                  <legend>Will you be bringing a plus one?</legend>
+                  <div className="choiceGrid two compact">
+                    <label>
+                      <input required type="radio" name="plusOne" value="yes" onChange={() => setPlusOne("yes")} />
+                      Yes
+                    </label>
+                    <label>
+                      <input required type="radio" name="plusOne" value="no" onChange={() => setPlusOne("no")} />
+                      No
+                    </label>
+                  </div>
+                </fieldset>
+                {plusOne === "yes" ? (
+                  <label className="fieldLabel">
+                    Name of your plus one
+                    <input name="plusOneName" required autoComplete="name" placeholder="Full name" />
+                  </label>
+                ) : null}
+              </>
+            ) : null}
+
+            {isFamily ? (
+              <fieldset>
+                <legend>Your family</legend>
+                <p className="fieldHint">
+                  Your invitation includes your family of {guest.familySize}. How many of you will be joining us?
+                </p>
+                <div className="choiceGrid familyCount compact">
+                  {Array.from({ length: guest.familySize ?? 0 }, (_, index) => index + 1).map((count) => (
+                    <label key={count}>
+                      <input
+                        required
+                        type="radio"
+                        name="familyCount"
+                        value={count}
+                        checked={familyCount === count}
+                        onChange={() => setFamilyCount(count)}
+                      />
+                      {count}
+                    </label>
+                  ))}
+                </div>
+                {familyCount > 0 ? (
+                  <div className="familyMembers">
+                    <p className="fieldHint">
+                      {isExtended
+                        ? "Please add each person’s name and the events they will join."
+                        : "Please add the name of each person joining us for the wedding."}
+                    </p>
+                    {joiningFamily.map((member, index) => (
+                      <div className="familyMember" key={index}>
+                        <label className="fieldLabel">
+                          Guest {index + 1}
+                          <input
+                            required
+                            autoComplete="off"
+                            placeholder="Full name"
+                            value={member.name}
+                            onChange={(event) => updateFamilyMember(index, { name: event.target.value })}
+                          />
+                        </label>
+                        {isExtended ? (
+                          <div className="choiceGrid familyEvents compact">
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={member.dinner}
+                                onChange={(event) => updateFamilyMember(index, { dinner: event.target.checked })}
+                              />
+                              Welcome Dinner
+                            </label>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={member.wedding}
+                                onChange={(event) => updateFamilyMember(index, { wedding: event.target.checked })}
+                              />
+                              Wedding
+                            </label>
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </fieldset>
+            ) : null}
+
+            {!isFamily || familyCount > 0 ? (
+              <fieldset>
+                <legend>Stay at {stayHotel.shortName}</legend>
+                <p className="fieldHint">
+                  We’d be happy to provide {stayOffer} at {hotelPrefix}{stayHotel.name}. Please let us know your preference.
+                </p>
+                <div className={isExtended ? "choiceGrid compact" : "choiceGrid two compact"}>
+                  {(isExtended
+                    ? [
+                        { value: "two-nights", label: "Two nights (August 13–15)" },
+                        { value: "one-night", label: "One night (August 14–15)" },
+                        { value: "no", label: isFamily ? "No, we’ll arrange our own stay" : "No, I’ll arrange my own stay" },
+                      ]
+                    : [
+                        { value: "yes", label: "Yes, please (August 14–15)" },
+                        { value: "no", label: "No, thank you" },
+                      ]
+                  ).map((option) => (
+                    <label key={option.value}>
+                      <input
+                        type="radio"
+                        name="accommodation"
+                        value={option.value}
+                        required
+                        checked={accommodation === option.value}
+                        onChange={() => setAccommodation(option.value)}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+                {isFamily && wantsRoom && familyCount > 1 ? (
+                  <div className="familyMembers">
+                    <p className="fieldHint">How many of your family will be staying?</p>
+                    <div className="choiceGrid familyCount compact">
+                      {Array.from({ length: familyCount }, (_, index) => index + 1).map((count) => (
+                        <label key={count}>
+                          <input
+                            required
+                            type="radio"
+                            name="stayingCount"
+                            value={count}
+                            checked={stayingCount === count}
+                            onChange={() => setStaying(count)}
+                          />
+                          {count}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </fieldset>
+            ) : null}
+
+            {guest.scheduleType === "extended" && !isFamily ? (
+              <fieldset>
+                <legend>Welcome dinner · Friday</legend>
+                <div className="choiceGrid two compact">
+                  <label><input type="radio" name="welcomeDinner" value="yes" required />Attending</label>
+                  <label><input type="radio" name="welcomeDinner" value="no" required />Unable to attend</label>
+                </div>
+              </fieldset>
+            ) : null}
+
+            {!isFamily ? (
+              <fieldset>
+                <legend>Wedding day · Saturday</legend>
+                <div className="choiceGrid two compact">
+                  <label><input type="radio" name="weddingDay" value="yes" required />Attending</label>
+                  <label><input type="radio" name="weddingDay" value="no" required />Unable to attend</label>
+                </div>
+              </fieldset>
+            ) : null}
+
+            <label className="fieldLabel">
+              Dietary restrictions
+              <textarea name="dietaryRestrictions" rows={3} placeholder="Please let us know of any allergies or dietary needs." />
+            </label>
+          </div>
+        ) : null}
+
+        <label className="fieldLabel">
+          Additional Notes / Requests / Questions <span className="optional">optional</span>
+          <textarea name="message" rows={4} placeholder="Leave a note…" />
+        </label>
+
+        {status === "error" ? <p className="formError" role="alert">{message}</p> : null}
+        <button className="submitRsvp" type="submit" disabled={status === "saving" || !attending}>
+          {status === "saving" ? "Sending…" : "Send RSVP"}
+        </button>
+      </form>
+    </>
   );
 }
 
@@ -580,9 +687,9 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
         </div>
       </section>
 
-      <Schedule scheduleType={guest.scheduleType} hotelType={guest.hotelType} />
+      <Schedule scheduleType={guest.scheduleType} />
       <TravelDetails />
-      <Stay scheduleType={guest.scheduleType} hotelType={guest.hotelType} />
+      <Stay scheduleType={guest.scheduleType} hotelType={guest.hotelType} familySize={guest.familySize} />
 
       <section id="rsvp" className="rsvpSection sectionPad">
         <RsvpForm guest={guest} />

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicGuest } from "@/lib/guests";
 import { getCurrentGuest } from "@/lib/session";
 import { saveRsvp } from "@/lib/sheets";
 
@@ -6,6 +7,18 @@ export const runtime = "nodejs";
 
 function clean(value: unknown, max = 1000) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+function parseFamilyMembers(value: unknown, familySize: number, extended: boolean) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, familySize).map((entry) => {
+    const member = (entry ?? {}) as Record<string, unknown>;
+    return {
+      name: clean(member.name, 200),
+      dinner: extended && member.dinner === true,
+      wedding: extended ? member.wedding === true : true,
+    };
+  });
 }
 
 export async function POST(request: Request) {
@@ -24,24 +37,61 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please tell us whether you'll be joining." }, { status: 400 });
   }
 
+  const invite = publicGuest(guest);
+  const extended = guest.scheduleType === "extended";
+  const joining = attending === "yes";
+  let guestNames: string[] = [];
+  let welcomeDinnerNames: string[] = [];
+  let weddingNames: string[] = [];
+
+  if (joining && invite.familySize !== null) {
+    const members = parseFamilyMembers(body.familyMembers, invite.familySize, extended);
+    if (!members.length || members.some((member) => !member.name)) {
+      return NextResponse.json({ error: "Please add the name of each guest joining us." }, { status: 400 });
+    }
+    if (members.some((member) => !member.dinner && !member.wedding)) {
+      return NextResponse.json({ error: "Please choose at least one event for each guest." }, { status: 400 });
+    }
+    guestNames = members.map((member) => member.name);
+    welcomeDinnerNames = members.filter((member) => member.dinner).map((member) => member.name);
+    weddingNames = members.filter((member) => member.wedding).map((member) => member.name);
+  } else if (joining) {
+    const plusOneName = invite.plusOneAllowed && clean(body.plusOne, 20) === "yes" ? clean(body.plusOneName, 200) : "";
+    guestNames = plusOneName ? [guest.name, plusOneName] : [guest.name];
+    if (extended && clean(body.welcomeDinner, 20) === "yes") welcomeDinnerNames = guestNames;
+    if (clean(body.weddingDay, 20) === "yes") weddingNames = guestNames;
+  }
+
+  const accommodation = joining ? clean(body.accommodation, 40) : "";
+  const wantsRoom = accommodation !== "" && accommodation !== "no";
+  const requestedStaying = Number(body.stayingCount);
+  const stayingCount = !wantsRoom
+    ? 0
+    : invite.familySize !== null && requestedStaying >= 1
+      ? Math.min(Math.floor(requestedStaying), guestNames.length)
+      : guestNames.length;
+
   try {
     const result = await saveRsvp({
       timestamp: new Date().toISOString(),
       guestId: guest.id,
       guestName: guest.name,
       scheduleType: guest.scheduleType,
-      hotelType: guest.hotelType === "st-regis" ? "st-regis" : "renaissance",
+      hotelType: invite.hotelType,
+      invitationType: invite.familySize !== null ? "family" : invite.plusOneAllowed ? "plus-one" : "single",
+      invited: invite.familySize ?? (invite.plusOneAllowed ? 2 : 1),
       attending,
       invitationName: clean(body.invitationName, 200),
       email: clean(body.email, 200),
       whatsapp: clean(body.whatsapp, 80),
-      plusOne: guest.plusOneAllowed ? clean(body.plusOne, 20) : "not-allotted",
-      plusOneName: guest.plusOneAllowed && clean(body.plusOne, 20) === "yes" ? clean(body.plusOneName, 200) : "",
-      welcomeDinner: guest.scheduleType === "extended" ? clean(body.welcomeDinner, 20) : "not-invited",
-      weddingDay: clean(body.weddingDay, 20),
-      brunch: clean(body.brunch, 20),
-      accommodation: clean(body.accommodation, 40),
-      partySize: guest.plusOneAllowed && clean(body.plusOne, 20) === "yes" ? "2" : attending === "yes" ? "1" : "0",
+      guestCount: guestNames.length,
+      guestNames: guestNames.join(", "),
+      welcomeDinnerCount: welcomeDinnerNames.length,
+      welcomeDinnerNames: welcomeDinnerNames.join(", "),
+      weddingCount: weddingNames.length,
+      weddingNames: weddingNames.join(", "),
+      accommodation,
+      stayingCount,
       dietaryRestrictions: clean(body.dietaryRestrictions, 500),
       message: clean(body.message, 1200),
     });

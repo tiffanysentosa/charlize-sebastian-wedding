@@ -10,8 +10,11 @@ export type Guest = {
   scheduleType: ScheduleType;
   /** When omitted, defaults to Renaissance. */
   hotelType?: HotelType;
-  /** When omitted, defaults to false. Set true per guest to show the +1 RSVP question. */
-  plusOneAllowed?: boolean;
+  /**
+   * Additional guests on this invitation, not counting this guest.
+   * Omitted or 0: just this guest. 1: a plus one. 2 or more: a family (3 means a family of 4).
+   */
+  guestCount?: number;
 };
 
 const demoGuests: Guest[] = [
@@ -21,7 +24,7 @@ const demoGuests: Guest[] = [
     passcode: "paradise_in_bali",
     scheduleType: "extended",
     hotelType: "renaissance",
-    plusOneAllowed: true,
+    guestCount: 1,
   },
   {
     id: "guest-renaissance-extended",
@@ -29,7 +32,6 @@ const demoGuests: Guest[] = [
     passcode: "tidal_pool",
     scheduleType: "extended",
     hotelType: "renaissance",
-    plusOneAllowed: false,
   },
   {
     id: "guest-stregis-extended-plus",
@@ -37,7 +39,7 @@ const demoGuests: Guest[] = [
     passcode: "coral_reefs_in_bali",
     scheduleType: "extended",
     hotelType: "st-regis",
-    plusOneAllowed: true,
+    guestCount: 1,
   },
   {
     id: "guest-stregis-extended",
@@ -45,7 +47,6 @@ const demoGuests: Guest[] = [
     passcode: "sea_glass",
     scheduleType: "extended",
     hotelType: "st-regis",
-    plusOneAllowed: false,
   },
   {
     id: "guest-renaissance-standard-plus",
@@ -53,7 +54,7 @@ const demoGuests: Guest[] = [
     passcode: "sandbars_in_bali",
     scheduleType: "standard",
     hotelType: "renaissance",
-    plusOneAllowed: true,
+    guestCount: 1,
   },
   {
     id: "guest-renaissance-standard",
@@ -61,7 +62,22 @@ const demoGuests: Guest[] = [
     passcode: "palm_shade",
     scheduleType: "standard",
     hotelType: "renaissance",
-    plusOneAllowed: false,
+  },
+  {
+    id: "guest-renaissance-extended-family",
+    name: "Budi Santoso",
+    passcode: "family_in_bali",
+    scheduleType: "extended",
+    hotelType: "renaissance",
+    guestCount: 3,
+  },
+  {
+    id: "guest-stregis-standard-family",
+    name: "Ayu Wijaya",
+    passcode: "family_by_the_sea",
+    scheduleType: "standard",
+    hotelType: "st-regis",
+    guestCount: 4,
   },
 ];
 
@@ -69,7 +85,6 @@ function normalizeGuest(guest: Guest): Guest {
   return {
     ...guest,
     hotelType: guest.hotelType === "st-regis" ? "st-regis" : "renaissance",
-    plusOneAllowed: guest.plusOneAllowed ?? false,
   };
 }
 
@@ -111,12 +126,19 @@ export function findGuestById(id: string) {
   return getGuests().find((guest) => guest.id === id);
 }
 
+function additionalGuests(guest: Guest) {
+  const count = Number(guest.guestCount);
+  return Number.isInteger(count) && count > 0 ? count : 0;
+}
+
 export function publicGuest(guest: Guest) {
+  const additional = additionalGuests(guest);
   return {
     id: guest.id,
     name: guest.name,
     scheduleType: guest.scheduleType,
     hotelType: guest.hotelType === "st-regis" ? "st-regis" : "renaissance",
-    plusOneAllowed: guest.plusOneAllowed ?? false,
+    plusOneAllowed: additional === 1,
+    familySize: additional >= 2 ? additional + 1 : null,
   };
 }

@@ -68,7 +68,7 @@ For the first production version, guest access is controlled by the server-only 
 Example:
 
 ```env
-GUESTS_JSON=[{"id":"guest-001","name":"Jeremy","passcode":"paradise","scheduleType":"extended","hotelType":"renaissance","plusOneAllowed":true},{"id":"guest-002","name":"Sarah","passcode":"sandbar","scheduleType":"standard","hotelType":"st-regis","plusOneAllowed":false}]
+GUESTS_JSON=[{"id":"guest-001","name":"Jeremy","passcode":"paradise","scheduleType":"extended","hotelType":"renaissance","guestCount":1},{"id":"guest-002","name":"Sarah","passcode":"sandbar","scheduleType":"standard","hotelType":"st-regis"}]
 ```
 
 Allowed `scheduleType` values:
@@ -83,6 +83,14 @@ Allowed `hotelType` values:
 renaissance -> Renaissance Bali (default if omitted)
 st-regis    -> The St. Regis Bali Resort
 ```
+```
+
+`guestCount` is the number of additional guests, not counting the person on the invitation:
+
+```text
+omitted or 0 -> just this guest
+1            -> a plus one (asks "Will you be bringing a plus one?")
+2 or more    -> a family (3 means a family of 4)
 ```
 
 For a larger list, the natural next step is moving the guest directory into a Google Sheet/database so you do not maintain a long JSON environment variable.
@@ -102,7 +110,7 @@ GOOGLE_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-The app automatically creates the header row if row 1 is empty, then appends each RSVP as a new row.
+The app keeps row 1 in sync with the expected headers. Each invitation has one row, so an updated RSVP replaces that guest's earlier answer.
 
 Without Google credentials, local RSVPs are written to:
 

@@ -158,7 +158,7 @@ a { color: inherit; }
   color: var(--muted-ink);
 }
 .loginForm input,
-.rsvpForm input:not([type="radio"]):not([type="hidden"]),
+.rsvpForm input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]),
 .rsvpForm select,
 .rsvpForm textarea {
   width: 100%;
@@ -180,7 +180,7 @@ a { color: inherit; }
   letter-spacing: .08em;
 }
 .loginForm input:focus,
-.rsvpForm input:not([type="radio"]):not([type="hidden"]):focus,
+.rsvpForm input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]):focus,
 .rsvpForm select:focus,
 .rsvpForm textarea:focus { border-color: var(--ink); }
 .loginForm button,
@@ -580,7 +580,6 @@ a { color: inherit; }
   max-width: 140px;
   object-fit: contain;
 }
-.weekendIcon-mobileOnly { display: none; }
 .weekendDay h3 {
   margin: 0;
   font-family: var(--font-display);
@@ -890,6 +889,11 @@ a { color: inherit; }
 .choiceGrid label:hover, .choiceGrid label:has(input:checked), .choiceGrid label.selected { border-color: var(--dusty-blue); background: rgba(122,145,179,.16); }
 .choiceGrid input { position: absolute; opacity: 0; pointer-events: none; }
 .choiceGrid.compact label { min-height: 50px; font-family: var(--font-serif); font-size: 15px; text-transform: none; letter-spacing: 0; }
+.choiceGrid.familyCount { grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); }
+.choiceGrid.familyEvents { grid-template-columns: 1fr 1fr; }
+.familyMembers { margin-top: 26px; animation: reveal .35s ease both; }
+.familyMember { margin-bottom: 26px; }
+.familyMember .fieldLabel { margin-bottom: 12px; }
 .rsvpDetails { animation: reveal .35s ease both; }
 @keyframes reveal { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 .fieldLabel { margin: 0 0 35px; }
@@ -941,7 +945,6 @@ a { color: inherit; }
 @media (max-width: 1100px) {
   .weekendBoard-3,
   .weekendBoard-2 { grid-template-columns: 1fr; gap: 56px; }
-  .weekendIcon-mobileOnly { display: grid; }
 }
 
 @media (min-width: 801px) {
