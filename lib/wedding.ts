@@ -8,7 +8,6 @@ export type WeddingEvent = {
   title: string;
   venue: string;
   detail?: string;
-  dressCode?: string;
   icon?: string;
 };
 
@@ -79,7 +78,6 @@ export const wedding: WeddingConfig = {
           time: "3:30 PM",
           title: "Holy Matrimony",
           venue: "St. Regis Beach",
-          dressCode: "Beach Formal",
         },
         {
           id: "cocktails",
@@ -107,7 +105,6 @@ export const wedding: WeddingConfig = {
           time: "6:00 PM",
           title: "Welcome Dinner",
           venue: "Location TBD",
-          dressCode: "Casual White Party",
           icon: "/images/icon1.png",
         },
         {
@@ -116,7 +113,6 @@ export const wedding: WeddingConfig = {
           time: "3:30 PM",
           title: "Holy Matrimony",
           venue: "St. Regis Beach",
-          dressCode: "Beach Formal",
         },
         {
           id: "cocktails",

@@ -278,7 +278,6 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
       date: friday.time ? `Friday, August 13th · ${friday.time}` : "Friday, August 13th",
       title: "The Welcome Dinner",
       icon: friday.icon,
-      dressCode: friday.dressCode,
       events: [{ ...friday, time: undefined }],
     } : null,
     {
@@ -286,16 +285,17 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
       date: "Saturday, August 14th",
       title: "The Wedding Day",
       icon: "/images/wedding-icon.png",
-      dressCode: saturday.find((event) => event.dressCode)?.dressCode,
       events: saturday,
     },
   ].filter((day) => day !== null);
+  // Wedding-only guests have a single day, so "The Wedding" heading already names it.
+  const weddingOnly = days.length === 1;
 
   return (
     <section id="schedule" className="scheduleSection sectionPad">
       <div className="scheduleTitle">
         <p className="scheduleThe">The</p>
-        <h2>Wedding<br />Weekend</h2>
+        <h2>{weddingOnly ? "Wedding" : <>Wedding<br />Weekend</>}</h2>
       </div>
       <div className={`weekendBoard weekendBoard-${days.length}`}>
         {days.map((day) => (
@@ -305,9 +305,8 @@ function Schedule({ scheduleType }: { scheduleType: ScheduleType }) {
                 <Image src={day.icon} alt="" width={280} height={280} />
               </div>
             ) : null}
-            <h3>{day.title}</h3>
+            {weddingOnly ? null : <h3>{day.title}</h3>}
             <p className="weekendDate">{day.date}</p>
-            {day.dressCode ? <p className="weekendDress">Dress code: {day.dressCode}</p> : null}
             <div className="weekendEvents">
               {day.events.map((event) => (
                 <div className="weekendEvent" key={event.id}>
@@ -739,7 +738,7 @@ function WeddingSite({ guest, musicPlaying, musicAvailable, toggleMusic }: {
         </div>
         <div className="contactPhoto">
           <Image
-            src="/images/couple-1.webp"
+            src="/images/telephone-contact.png"
             alt="Sebastian and Charlize"
             fill
             sizes="(max-width: 800px) 100vw, 50vw"
